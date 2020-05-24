@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en" class="no-js">
+
+<head>
+{% block head %}
+    <meta charset="utf-8">
+
+    <title>{% block title %}{% endblock %}</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- SEO & Open Graph -->
+    <meta property="og:description" name="description" content="Studio 24 design system for Apollo CSS framework"/>
+    <meta property="og:url" content="http://apollo.s24.net/"/>
+    <meta property="og:image" content="http://apollo.s24.net/dist/assets/images/apollo.png"/>
+    <meta property="og:title" content="Apollo"/>
+
+    <!-- scripts -->
+    <script>(function(H){H.className=H.className.replace(/\bno-js\b/,'js')})(document.documentElement)</script>
+
+    <!-- styles -->
+    <link rel="stylesheet" href="/dist/assets/styles/styles.min.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/assets/design-system/styles/design-system.css" type="text/css" media="screen" />
+{% endblock %}
+</head>
+
+<body>
+  <div class="wrap">
+      <header>
+          <a href="/"><img src="/dist/assets/images/apollo.png" class="logo">Apollo</a>
+          <nav>
+              <ul class="nav">
+                  <li><a href="">Home</a></li>
+                  <li><a href="">Get started</a></li>
+                  <li><a href="">Guidelines</a>
+                      <ul>
+                          <li><a href="">Typography</a></li>
+                      </ul>
+                  </li>
+                  <li><a href="">Components</a></li>
+                  <li><a href="">Examples</a></li>
+                  <li><a href="">Support</a></li>
+              </ul>
+          </nav>
+      </header>
+
+  <main>
+    {% block main %}{% endblock %}
+  </main>
+  </div>
+
+  <footer class="global-footer">
+    Footer content goes here
+  </footer>
+
+</body>
+</html>

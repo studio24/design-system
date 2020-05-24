@@ -1,0 +1,19 @@
+{% set title = 'Tables' %}
+
+{% block content %}
+
+{% apply markdown_to_html %}
+    ## Usage notes on tables
+
+    Some text here and here
+{% endapply %}
+
+{{ example('tables.html.twig') }}
+
+{% apply markdown_to_html %}
+
+    More text here.
+
+{% endapply %}
+
+{% endblock %}
