@@ -101,7 +101,7 @@ class Markdown
 
     /**
      * Parse markdown and return HTML
-     * @param string $sourcePath Path to markdown file
+     * @param string $sourcePath Config to markdown file
      * @return string
      */
     public function parseFile(string $sourcePath): string

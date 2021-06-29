@@ -2,16 +2,47 @@
 
 Simple PHP-powered tool to create a static design system website using [Twig](https://twig.symfony.com/) for page templating.
 
+## Example usage 
+
+This tool does the following:
+* Runs asset build command
+* Copies assets (or other files/folders) to dist folder 
+* Copies Twig templates and parses these into HTML using sample data
+* Adds Twig function `example()` to output example HTML component in markdown docs
+* Copies markdown files and parses these into HTML
+
+Example folder structure:
+
+```
+assets/
+dist/
+docs/
+templates/
+composer.json
+config.php
+```
+
+Build design system HTML:
+
+```
+php build.php
+```
+
+This outputs documentation into the `dist/` folder. 
+
 ## Requirements
 
 * PHP 7.3+
 * [Composer](https://getcomposer.org/)
-* [Node](https://nodejs.org/en/)
-* [NVM](https://github.com/nvm-sh/nvm)
 
 ## Installation
 
 ```bash
+composer require --dev studio24/design-system
+```
+
+
+```
 composer install
 nvm use
 npm install
@@ -19,10 +50,16 @@ npm install
 
 ## Usage
 
-Build static files:
+Build static files from the current folder, saving files to `dist/`:
 
 ```bash
-php apollo build
+php apollo build 
+```
+
+You can also specify the path where source files come from:
+
+```bash
+php apollo build path/to/files
 ```
 
 By default Apollo builds everything, but you can build one element by passing the command name: 
@@ -52,6 +89,32 @@ php -S localhost:8000 -t dist watch.php
 ## Directory structure
 
 Design system projects contain the following directory structure:
+
+```
+my-project-root
+├── docs
+├── dist
+├── templates
+├── var
+│   └── cache
+├── composer.json
+├── apollo.php
+└── package.json
+```
+
+Build: 
+
+```
+./vendor/bin/apollo build
+```
+
+View built templates from `dist/` folder:
+
+```
+php -S localhost:8000 -t dist
+```
+
+OLD:
 
 ```
 my-project-root

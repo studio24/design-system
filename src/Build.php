@@ -13,90 +13,42 @@ use Twig\Environment;
 class Build
 {
     use OutputTrait;
-
-    /**
-     * Default config values, can be overridden in config.php
-     * @var array
-     */
-    protected $config = [
-        'debug'             => false,
-        'source_path'       => null,
-        'destination_path'  => null,
-        'cache_path'        => null,
-        'build_command'     => 'npm run build',
-        'navigation'        => [
-            'Get started'   => 'get-started.md',
-            'Guidelines'    => 'guidelines/',
-            'Components'    => 'components/',
-            'Examples'      => 'examples/',
-            'Support'       => 'support.md'
-        ],
-    ];
-
-    /**
-     * Path to root project folder
-     * @var string
-     */
-    protected $rootPath;
-
-    /** @var string */
-    protected $sourcePath;
-
-    /** @var string */
-    protected $destPath;
-
-    /** @var Environment */
-    protected $twig;
-
-    /** @var Markdown */
-    protected $markdown;
+    private Config $config;
+    private string $sourcePath;
+    private string $destPath;
+    private Environment $twig;
+    protected Markdown $markdown;
 
     /**
      * Initialise Apollo Build
-     * @param string $configPath Path to config file
+     * @param string $configPath Config to config file, if passed
      * @param bool $autoReload Whether to auto reload Twig templates on file change
      * @throws ConfigException
      */
-    public function __construct(string $configPath, $autoReload = true)
+    public function __construct($autoReload = true)
     {
-        $this->rootPath = realpath(__DIR__ . '/../');
-        if ($this->rootPath === false) {
-            throw new ConfigException('Cannot calculate root project path at ./../');
-        }
+        $this->config = Config::getInstance();
+        $this->setSourcePath($this->config->getConfigPath('source'));
+        $this->setDestPath($this->config->getConfigPath('destination'));
 
-        // Set local config
-        if (!file_exists($configPath)) {
-            throw new ConfigException(sprintf('Config file does not exist at %s', $configPath));
-        }
-        require $configPath;
-        if (!isset($config) || !is_array($config)) {
-            throw new ConfigException('Config file must contain the $config variable and it must be an array');
-        }
-        foreach ($this->config as $name => $value) {
-            if (isset($config[$name])) {
-                $this->config[$name] = $config[$name];
-            }
-        }
-        $this->setSourcePath($this->getPath($this->config('source_path')));
-        $this->setDestPath($this->getPath($this->config('destination_path')));
-
-        // Twig
-        $cachePath = $this->getPath($this->config('cache_path'));
-        if (!is_writable($cachePath)) {
+        // Twig setup
+        $options = [];
+        $cachePath = $this->config->getConfigPath('cache_path');
+        if (!empty($cachePath) && !is_writable($cachePath)) {
             throw new ConfigException('Twig cache path is not writeable');
         }
-        $loader = new FilesystemLoader([
-            $this->getSourcePath('templates'),
-            $this->getSourcePath(),
-            $this->getPath('design-system')
-        ]);
-        $options = ['cache' => $cachePath];
+        if (!empty($cachePath)) {
+            $options = ['cache' => $cachePath];
+        }
         if ($autoReload) {
             $options['auto_reload'] = true;
         }
-        if ($this->config('debug')) {
+        if ($this->config->get('debug')) {
             $options['debug'] = true;
         }
+        $loader = new FilesystemLoader([
+            $this->getSourcePath()
+        ]);
         $this->twig = new Environment($loader, $options);
         $this->markdown = new Markdown();
         $this->markdown->setTwig($this->twig);
@@ -108,58 +60,36 @@ class Build
     }
 
     /**
-     * Return path relative to root
-     * @param string $path
-     * @return string
-     */
-    public function getPath(string $path): string
-    {
-        return $this->rootPath . '/' . ltrim($path, '/');
-    }
-
-    /**
-     * Return config value, or null if not set
-     * @param string $name
-     * @return mixed|null
-     */
-    public function config(string $name)
-    {
-        if (isset($this->config[$name])) {
-            return $this->config[$name];
-        }
-        return null;
-    }
-
-    /**
      * Set the source path
      * @param string $sourcePath
      * @throws ConfigException
      */
     public function setSourcePath(string $sourcePath)
     {
-        $sourcePath = realpath($sourcePath);
-        if (!file_exists($sourcePath)) {
+        $realSourcePath = realpath($sourcePath);
+        if (!$realSourcePath) {
             throw new ConfigException(sprintf('Source path "%s" must exist', $sourcePath));
         }
-        $this->sourcePath = $sourcePath;
+        $this->sourcePath = $realSourcePath;
     }
 
     /**
      * Return source path
      * @param null $childPath Optional child path to append
+     * @param bool $exists Test whether the path exists
      * @return string
      */
-    public function getSourcePath($childPath = null): string
+    public function getSourcePath($childPath = null, bool $exists = true): string
     {
         if ($childPath !== null) {
-            $childPath = ltrim($childPath, '/');
-            $testPath = $this->sourcePath . '/' . $childPath;
-            if (!file_exists($testPath)) {
-                throw new BuildException(sprintf('Source path "%s" cannot be found', $testPath));
+            try {
+                $path = $this->config->getRelativePath($this->sourcePath, $childPath, $exists);
+                return $path;
+            } catch (PathDoesNotExistException $e) {
+                throw new BuildException(sprintf('Source path "%s" does not exist', $path));
             }
-            return $testPath;
-        }
 
+        }
         return $this->sourcePath;
     }
 
@@ -170,25 +100,32 @@ class Build
      */
     public function setDestPath(string $destPath)
     {
-        $destPath = realpath($destPath);
-        if (!file_exists($destPath) || !is_writable($destPath)) {
-            throw new ConfigException(sprintf('Destination path "%s" must exist and be writable', $sourcePath));
+        $realDestPath = realpath($destPath);
+        if (!$realDestPath) {
+            throw new ConfigException(sprintf('Destination path "%s" must exist', $destPath));
         }
-        $this->destPath = $destPath;
+        if (!is_writable($realDestPath)) {
+            throw new ConfigException(sprintf('Destination path "%s" must be writable', $destPath));
+        }
+        $this->destPath = $realDestPath;
     }
 
     /**
      * Return destination path
      * @param null $childPath Optional child path to append
+     * @param bool $exists Test whether the path exists
      * @return string
      */
-    public function getDestPath($childPath = null): string
+    public function getDestPath($childPath = null, bool $exists = false): string
     {
         if ($childPath !== null) {
-            $childPath = ltrim($childPath, '/');
-            return $this->destPath . '/' . $childPath;
+            try {
+                $path = $this->config->getRelativePath($this->destPath, $childPath, $exists);
+                return $path;
+            } catch (PathDoesNotExistException $e) {
+                throw new BuildException(sprintf('Destination path "%s" does not exist', $path));
+            }
         }
-
         return $this->destPath;
     }
 
@@ -196,14 +133,14 @@ class Build
      * Delete all files from destination folder, so we can create a clean new set of files
      * @return int Number of files deleted
      */
-    public function deleteDestFiles(): int
+    public function cleanDestFiles(): int
     {
         $x = 0;
         $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->getDestPath()));
         $it->rewind();
         while($it->valid()) {
-            // Skip file: .gitkeep
-            if (!$it->isDot() && $it->getSubPathName() !== '.gitkeep') {
+            // Skip file: .gitkeep & .gitignore
+            if (!$it->isDot() && !in_array($it->getSubPathName(), $this->config->get('clean_ignore_files'))) {
                 unlink($it->key());
                 $x++;
             }
@@ -221,7 +158,10 @@ class Build
      */
     public function buildAssets(bool $passthru = false)
     {
-        $command = $this->config('build_command');
+        $command = $this->config->get('build_command');
+        if (empty($command)) {
+            return;
+        }
 
         $command = "cd {$this->rootPath} && " . $command;
         $output = '';
@@ -241,10 +181,17 @@ class Build
         }
     }
 
+    public function copyDesignSystemAssets()
+    {
+        // Copy CSS for design system layout
+        $this->createDestFolder('assets/design-system/styles/');
+        $this->copyFile(__DIR__ . '/../assets/design-system.css', $this->getDestPath('assets/design-system/styles/design-system.css'));
+    }
+
     /**
      * Build a markdown page into HTML, including front matter
      * @param string $source Source path, relative to source folder
-     * @return string Path HTML written to
+     * @return string Config HTML written to
      * @throws \Twig\Error\LoaderError
      * @throws \Twig\Error\RuntimeError
      * @throws \Twig\Error\SyntaxError
@@ -262,7 +209,10 @@ class Build
         $html = $this->markdown->parseFile($sourcePath);
 
         $templateFolder = str_replace($this->getSourcePath(), '', dirname($source));
-        $html = $this->markdown->parseSpecialFunctions($html, $templateFolder, dirname($sourcePath), $this->getDestPath($templateFolder));
+
+        // @todo SpecialFunctions has moved, review this
+        //$html = $this->markdown->parseSpecialFunctions($html, $templateFolder, dirname($sourcePath), $this->getDestPath($templateFolder));
+
         $data = [
             'content'   => $html,
         ];
@@ -295,28 +245,20 @@ class Build
 
     /**
      * Copy file from source to destination
-     * @param string $source Source file, relative to source folder
-     * @param string $destFolder Destination folder, if different from source folder
+     * @param string $sourcePath Source file
+     * @param string $destination Destination file
      * @throws BuildException
      */
-    public function copyFileToDest(string $source, string $destFolder = null)
+    public function copyFile(string $source, string $destination = null)
     {
-        // Calculate destination path
-        $source = $this->getSourcePath($source);
-        if ($destFolder !== null) {
-            $destination = rtrim($destFolder, '/') . '/' . basename($source);
-        } else {
-            $destination = $this->getDestPath($source);
-        }
-
         if (!copy($source, $destination)) {
-            throw new BuildException(sprintf('Cannot copy file to destination %s', $destination));
+            throw new BuildException(sprintf('Cannot copy source file %s to destination %s', $source, $destination));
         }
     }
 
     /**
      * Render a template and output to destination folder
-     * @param string $templatePath Path to template file, relative to source folder
+     * @param string $templatePath Config to template file, relative to source folder
      * @param string $destFolder Folder to save outputted file to, relative to destination folder
      * @throws BuildException
      * @throws \Twig\Error\LoaderError

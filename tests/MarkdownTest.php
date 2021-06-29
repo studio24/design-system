@@ -1,7 +1,4 @@
 <?php
-declare(strict_types=1);
-
-namespace Apollo\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Studio24\Apollo\Markdown;

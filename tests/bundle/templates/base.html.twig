@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en" class="no-js">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{% block title %}HTML boilerplate{% endblock %}</title>
+
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <script>(function(H){H.className=H.className.replace(/\bno-js\b/,'js')})(document.documentElement)</script>
+
+    {% block stylesheets %}{% endblock %}
+    {% block javascripts %}{% endblock %}
+</head>
+
+<body>
+
+<div id="top" class="wrap">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header role="banner">
+        Header content goes here
+    </header>
+
+    <main id="main" role="main">
+        {% block body %}{% endblock %}
+    </main>
+
+</div>
+<footer class="global-footer" role="contentinfo">
+    Footer content goes here
+</footer>
+
+</body>
+</html>

@@ -4,7 +4,7 @@
     "type": "library",
     "license": "MIT",
     "require": {
-        "php": "^7.3.0",
+        "php": ">7.3.0",
         "twig/twig": "^3.0",
         "erusev/parsedown": "^1.7",
         "spatie/yaml-front-matter": "^2.0",
@@ -17,11 +17,10 @@
     },
     "autoload": {
         "psr-4": {
-            "Studio24\\Apollo\\": "php"
+            "Studio24\\Apollo\\": "src"
         }
     },
-    "bin": ["apollo"],
-    "config": {
-        "bin-dir": "./"
-    }
+    "bin": [
+        "bin/apollo"
+    ]
 }

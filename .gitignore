@@ -1,4 +1,3 @@
-dist
 vendor
-node_modules
-var
+.phpunit.result.cache
+package-lock.json

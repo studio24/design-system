@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Apollo build config
+ * Apollo dist config
  *
- * @see Studio24\Apollo\Build::$config
+ * @see Studio24\src\Build::$config
  */
 $config = [
     'source_path'       => 'source',
     'destination_path'  => 'dist',
     'cache_path'        => 'var/cache',
-    'build_command'     => 'npm run build',
+    'build_command'     => 'npm run dist',
     'navigation' => [
         'Home'          => 'index.md',
         'Get started'   => 'get-started.md',
