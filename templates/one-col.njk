@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title>{{ title }}</title>
+
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+
+	<script src="../assets/apollo-dist/assets/js/libraries/fontfaceobserver.js"></script>
+
+	<script>
+		var myFont = new FontFaceObserver('Noto Sans');
+
+		Promise.all([myFont.load()]).then(function () {
+			document.documentElement.className += " fonts-loaded";
+		});
+	</script>
+
+	<link rel="stylesheet" href="../assets/design-system/styles.css" media="screen" />
+	<link rel="stylesheet" href="../assets/design-system/a11y-dark.css" media="screen" />
+</head>
+<body>
+	<div class="wrap">
+
+		{% include "partials/_header.njk" %}
+
+		<main id="main" class="l-center l-stack">
+			{% block main %}
+				This is the default content.
+			{% endblock %}
+		</main>
+	</div>
+
+
+{% include "partials/_footer.njk" %}
+</body>
+</html>
