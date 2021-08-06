@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title>{{ title }}</title>
+
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+
+	<script src="/assets/design-system/js/libraries/fontfaceobserver.js"></script>
+
+	<script>
+		var myFont = new FontFaceObserver('Noto Sans');
+
+		Promise.all([myFont.load()]).then(function () {
+			document.documentElement.className += " fonts-loaded";
+		});
+	</script>
+
+	<link rel="stylesheet" href="/assets/design-system/styles.css" media="screen" />
+	<link rel="stylesheet" href="/assets/design-system/a11y-dark.css" media="screen" />
+</head>
+<body>
+	<div class="wrap">
+		{% include "@DesignSystem/partials/_header.html.twig" %}
+
+		<div class="l-center l-sidebar">
+			<div>
+				<div class="sidebar">
+					{% block sidemenu %}
+					{% endblock %}
+				</div>
+				<div class="not-sidebar">
+					<main id="main" class="l-stack">
+						{% block main %}
+						{% endblock %}
+					</main>
+				</div>
+			</div>
+		</div>
+	</div>
+
+{% include "@DesignSystem/partials/_footer.html.twig" %}
+</body>
+</html>

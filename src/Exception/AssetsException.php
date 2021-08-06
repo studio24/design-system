@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Studio24\Apollo\Exception;
+namespace Studio24\DesignSystem\Exception;
 
 class AssetsException extends \Exception
 {

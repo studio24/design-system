@@ -1,5 +1,5 @@
 {
-    "name": "studio24/apollo",
+    "name": "studio24/design-system",
     "description": "PHP based build system for a static Design System, based on the Apollo CSS framework",
     "type": "library",
     "license": "MIT",
@@ -9,7 +9,9 @@
         "erusev/parsedown": "^1.7",
         "spatie/yaml-front-matter": "^2.0",
         "symfony/console": "^5.0",
-        "symfony/stopwatch": "^5.0"
+        "symfony/stopwatch": "^5.0",
+        "league/flysystem": "^2.2",
+        "masterminds/html5": "^2.7"
     },
     "require-dev": {
         "phpunit/phpunit": "^8",
@@ -17,10 +19,10 @@
     },
     "autoload": {
         "psr-4": {
-            "Studio24\\Apollo\\": "src"
+            "Studio24\\DesignSystem\\": "src"
         }
     },
     "bin": [
-        "bin/apollo"
+        "bin/design-system"
     ]
 }

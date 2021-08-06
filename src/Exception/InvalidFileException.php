@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Studio24\DesignSystem\Exception;
 
-class BuildException extends \Exception
+class InvalidFileException extends \Exception
 {
 
 }

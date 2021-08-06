@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Studio24\Apollo\Command;
+namespace Studio24\DesignSystem\Command;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

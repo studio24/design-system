@@ -1,0 +1,31 @@
+<!doctype html>
+
+<!-- default example code template, override this in your local template folder -->
+<html dir="ltr" lang="en" class="no-js">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title>{{ title }}</title>
+
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+
+	<script src="/assets/design-system/js/libraries/fontfaceobserver.js"></script>
+
+	<script>
+		var myFont = new FontFaceObserver('Noto Sans');
+
+		Promise.all([myFont.load()]).then(function () {
+			document.documentElement.className += " fonts-loaded";
+		});
+	</script>
+
+	<link rel="stylesheet" href="/assets/design-system/styles.css" media="screen"/>
+
+</head>
+<body>
+
+{{ html | raw }}
+
+</body>
+</html>

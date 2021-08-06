@@ -1,3 +1,4 @@
 vendor
 .phpunit.result.cache
 package-lock.json
+tests/example/apollo

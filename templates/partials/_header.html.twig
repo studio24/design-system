@@ -1,0 +1,17 @@
+<header class="global-header l-center">
+	<a href="#main" class="skip-link">Skip to content</a>
+	<div class="l-cluster">
+		<div class="global-header__inner">
+			<a class="global-logo" href="/">
+				{% include '@DesignSystem/header-title.html.twig' %}
+			</a>
+			<nav class="global-nav l-cluster" aria-label="Main">
+				<ul class="clean-list" role="list">
+					{% for item in navigation %}
+						<li class="{% if item.active %}active{% endif %}"><a class="nav-link" href="{{ item.link }}">{{ item.label }}</a></li>
+					{% endfor %}
+				</ul>
+			</nav>
+		</div>
+	</div>
+</header>

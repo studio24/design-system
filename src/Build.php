@@ -1,169 +1,136 @@
 <?php
 declare(strict_types=1);
 
-namespace Studio24\Apollo;
+namespace Studio24\DesignSystem;
 
-use Studio24\Apollo\Exception\BuildException;
-use Studio24\Apollo\Exception\ConfigException;
-use Studio24\Apollo\Exception\AssetsException;
-use Studio24\Apollo\Traits\OutputTrait;
+use League\Flysystem\FileAttributes;
+use League\Flysystem\Filesystem;
+use League\Flysystem\FilesystemException;
+use League\Flysystem\Local\LocalFilesystemAdapter;
+use League\Flysystem\UnableToWriteFile;
+use Parsedown;
+use Spatie\YamlFrontMatter\YamlFrontMatter;
+use Studio24\DesignSystem\Exception\BuildException;
+use Studio24\DesignSystem\Exception\ConfigException;
+use Studio24\DesignSystem\Exception\AssetsException;
+use Studio24\DesignSystem\Parser\ExampleHtmlParser;
+use Studio24\DesignSystem\Parser\ExampleParser;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Twig\Loader\FilesystemLoader;
 use Twig\Environment;
 
 class Build
 {
-    use OutputTrait;
     private Config $config;
-    private string $sourcePath;
-    private string $destPath;
-    private Environment $twig;
-    protected Markdown $markdown;
+    private SymfonyStyle $output;
+    private Filesystem $filesystem;
+    private Parsedown $markdown;
+    private ?Environment $twig = null;
+    private ExampleParser $example;
+    private ExampleHtmlParser $exampleHtml;
 
     /**
-     * Initialise Apollo Build
-     * @param string $configPath Config to config file, if passed
-     * @param bool $autoReload Whether to auto reload Twig templates on file change
+     * Constructor
+     * @param Config $config
+     * @param SymfonyStyle $output
+     * @throws ConfigException
+     * @throws Exception\PathDoesNotExistException
+     */
+    public function __construct(Config $config, SymfonyStyle $output)
+    {
+        $this->config = $config;
+        $this->output = $output;
+
+        $adapter = new LocalFilesystemAdapter($config->getRootPath());
+        $this->filesystem = new Filesystem($adapter);
+        $this->markdown = new Parsedown();
+
+        // Setup markdown special functions to output code examples
+        $this->example = new ExampleParser();
+        $this->example->setTwig($this->getTwig());
+        $this->example->setConfig($this->config);
+        $this->example->setOutput($output);
+        $this->example->setFilesystem($this->filesystem);
+
+        $this->exampleHtml = new ExampleHtmlParser();
+        $this->exampleHtml->setExampleFunction($this->example);
+        $this->exampleHtml->setTwig($this->getTwig());
+    }
+
+    /**
+     * Return Twig object
+     *
+     * Default path: templates folder in your project root
+     * @DesignSystem: templates folder in Design System repo
+     *
+     * @return Environment
      * @throws ConfigException
      */
-    public function __construct($autoReload = true)
+    public function getTwig(): Environment
     {
-        $this->config = Config::getInstance();
-        $this->setSourcePath($this->config->getConfigPath('source'));
-        $this->setDestPath($this->config->getConfigPath('destination'));
+        if ($this->twig instanceof Environment) {
+            return $this->twig;
+        }
 
-        // Twig setup
         $options = [];
-        $cachePath = $this->config->getConfigPath('cache_path');
-        if (!empty($cachePath) && !is_writable($cachePath)) {
-            throw new ConfigException('Twig cache path is not writeable');
-        }
-        if (!empty($cachePath)) {
-            $options = ['cache' => $cachePath];
-        }
-        if ($autoReload) {
-            $options['auto_reload'] = true;
+        if ($this->config->has('cache_path')) {
+            $options = ['cache' => $this->config->getFullPath('cache_path')];
+        } else {
+            $options = ['cache' => sys_get_temp_dir()];
         }
         if ($this->config->get('debug')) {
             $options['debug'] = true;
         }
+
+        // Default template path
         $loader = new FilesystemLoader([
-            $this->getSourcePath()
+            $this->config->getFullPath('templates_path'),
         ]);
-        $this->twig = new Environment($loader, $options);
-        $this->markdown = new Markdown();
-        $this->markdown->setTwig($this->twig);
-    }
 
-    public function getMarkdown(): Markdown
-    {
-        return $this->markdown;
-    }
+        // Add additional template paths
+        $loader->setPaths([
+            $this->config->getFullPath('templates_path') . DIRECTORY_SEPARATOR . 'design-system/',
+            __DIR__ . '/../templates'
+        ], 'DesignSystem');
 
-    /**
-     * Set the source path
-     * @param string $sourcePath
-     * @throws ConfigException
-     */
-    public function setSourcePath(string $sourcePath)
-    {
-        $realSourcePath = realpath($sourcePath);
-        if (!$realSourcePath) {
-            throw new ConfigException(sprintf('Source path "%s" must exist', $sourcePath));
-        }
-        $this->sourcePath = $realSourcePath;
-    }
-
-    /**
-     * Return source path
-     * @param null $childPath Optional child path to append
-     * @param bool $exists Test whether the path exists
-     * @return string
-     */
-    public function getSourcePath($childPath = null, bool $exists = true): string
-    {
-        if ($childPath !== null) {
-            try {
-                $path = $this->config->getRelativePath($this->sourcePath, $childPath, $exists);
-                return $path;
-            } catch (PathDoesNotExistException $e) {
-                throw new BuildException(sprintf('Source path "%s" does not exist', $path));
-            }
-
-        }
-        return $this->sourcePath;
-    }
-
-    /**
-     * Set destination path
-     * @param string $destPath
-     * @throws ConfigException
-     */
-    public function setDestPath(string $destPath)
-    {
-        $realDestPath = realpath($destPath);
-        if (!$realDestPath) {
-            throw new ConfigException(sprintf('Destination path "%s" must exist', $destPath));
-        }
-        if (!is_writable($realDestPath)) {
-            throw new ConfigException(sprintf('Destination path "%s" must be writable', $destPath));
-        }
-        $this->destPath = $realDestPath;
-    }
-
-    /**
-     * Return destination path
-     * @param null $childPath Optional child path to append
-     * @param bool $exists Test whether the path exists
-     * @return string
-     */
-    public function getDestPath($childPath = null, bool $exists = false): string
-    {
-        if ($childPath !== null) {
-            try {
-                $path = $this->config->getRelativePath($this->destPath, $childPath, $exists);
-                return $path;
-            } catch (PathDoesNotExistException $e) {
-                throw new BuildException(sprintf('Destination path "%s" does not exist', $path));
-            }
-        }
-        return $this->destPath;
+        $this->templatesTwig = new Environment($loader, $options);
+        return $this->templatesTwig;
     }
 
     /**
      * Delete all files from destination folder, so we can create a clean new set of files
-     * @return int Number of files deleted
+     *
+     * @throws BuildException
      */
-    public function cleanDestFiles(): int
+    public function cleanDestination(): void
     {
-        $x = 0;
-        $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->getDestPath()));
-        $it->rewind();
-        while($it->valid()) {
-            // Skip file: .gitkeep & .gitignore
-            if (!$it->isDot() && !in_array($it->getSubPathName(), $this->config->get('clean_ignore_files'))) {
-                unlink($it->key());
-                $x++;
-            }
-            $it->next();
+        $destination = Config::DIST_PATH;
+        try {
+            $this->filesystem->deleteDirectory($destination);
+        } catch (FilesystemException | UnableToDeleteDirectory $exception) {
+            throw new BuildException(sprintf('Cannot clean destination folder, error: %s', $exception->getMessage()));
         }
-
-        return $x;
+        try {
+            $this->filesystem->createDirectory($destination);
+        } catch (FilesystemException | UnableToCreateDirectory $exception) {
+            throw new BuildException(sprintf('Cannot create destination folder, error: %s', $exception->getMessage()));
+        }
     }
 
     /**
-     * Build assets
-     * @param string $command Command to run to build assets, relative to project root path
+     * Build frontend assets
      * @param bool $passthru Whether to output result of command as it runs or not
      * @throws AssetsException
      */
     public function buildAssets(bool $passthru = false)
     {
-        $command = $this->config->get('build_command');
+        $command = $this->config->get('assets_build_command');
         if (empty($command)) {
-            return;
+            throw new AssetsException("Cannot build assets since \$config['assets_build_command'] not set");
         }
 
-        $command = "cd {$this->rootPath} && " . $command;
+        // Change dir, then run command
+        $command = sprintf('cd %s && %s',$this->config->getRootPath(), $command);
         $output = '';
 
         if ($passthru) {
@@ -175,86 +142,144 @@ class Build
         if ($status !== 0) {
             $message = 'Command: ' . $command;
             if (!$passthru) {
-                $message .= PHP_EOL . 'Output: ' . $output;
+                $message .= PHP_EOL . 'Output: ' . implode("\n", $output);
             }
             throw new AssetsException('Asset build failed. ' . $message);
         }
     }
 
+    /**
+     * Copy design system website assets
+     * Copes files from /assets to ./_dist/assets/design-system of project
+     * @throws BuildException
+     */
     public function copyDesignSystemAssets()
     {
-        // Copy CSS for design system layout
-        $this->createDestFolder('assets/design-system/styles/');
-        $this->copyFile(__DIR__ . '/../assets/design-system.css', $this->getDestPath('assets/design-system/styles/design-system.css'));
+        $source = __DIR__  . '/../assets/';
+        $adapter = new LocalFilesystemAdapter($source);
+        $assetsFilesystem = new Filesystem($adapter);
+
+        try {
+            $listing = $assetsFilesystem->listContents('design-system', Filesystem::LIST_DEEP);
+
+            /** @var \League\Flysystem\StorageAttributes $item */
+            foreach ($listing as $item) {
+                $path = $item->path();
+                if ($item instanceof FileAttributes) {
+                    $destination = $this->config->buildPath(Config::DIST_PATH . '/assets', $path);
+                    $this->filesystem->write($destination, $assetsFilesystem->read($path));
+
+                    if ($this->output->isVerbose()) {
+                        $this->output->text('* ' . $destination);
+                    }
+                }
+            }
+        } catch (FilesystemException | UnableToWriteFile $exception) {
+            throw new BuildException(sprintf('Cannot copy design system assets from source %s to dist, error: %s', $source, $exception->getMessage()));
+        }
     }
 
     /**
-     * Build a markdown page into HTML, including front matter
-     * @param string $source Source path, relative to source folder
-     * @return string Config HTML written to
+     * Build markdown files as HTML
+     * @throws BuildException
+     */
+    public function buildPages()
+    {
+        $docsPath = $this->config->get('docs_path');
+        $this->output->text(sprintf('Parsing folder for markdown pages: %s', $docsPath));
+
+        try {
+            $listing = $this->filesystem->listContents($docsPath, Filesystem::LIST_DEEP);
+
+            /** @var \League\Flysystem\StorageAttributes $item */
+            foreach ($listing as $item) {
+                if ($item instanceof FileAttributes) {
+                    $path = $item->path();
+                    $pathinfo = pathinfo($path);
+                    $dirname = $pathinfo['dirname'];
+                    $filename = $pathinfo['filename'];
+                    $extension = $pathinfo['extension'];
+
+                    // Only build .md files
+                    if (strtolower($extension) !== 'md') {
+                        continue;
+                    }
+
+                    // Destination
+                    if ($filename === 'README.md') {
+                        $filename = 'index';
+                    }
+                    $dir = Config::DIST_PATH . preg_replace('!^docs!', '', $dirname);
+                    $destination =  $dir . DIRECTORY_SEPARATOR . $filename . '.html';
+                    $html = $this->buildDocsPage($path, $destination);
+                }
+            }
+        } catch (FilesystemException | UnableToWriteFile $exception) {
+            throw new BuildException(sprintf('Cannot build markdown page from source %s to _dist, error: %s', $docsPath, $exception->getMessage()));
+        }
+
+        // @todo Create index pages
+
+    }
+
+    /**
+     * Render markdown page and return HTML page
+     * @param string $sourcePath Source file to read markdown from
+     * @param string $destination Destination to save HTML page to
+     * @throws BuildException
      * @throws \Twig\Error\LoaderError
      * @throws \Twig\Error\RuntimeError
      * @throws \Twig\Error\SyntaxError
      */
-    public function buildMarkdownPage(string $source): string
+    public function buildDocsPage(string $sourcePath, string $destination)
     {
-        $sourcePath = $this->getSourcePath($source);
-        if (!file_exists($sourcePath)) {
-            throw new BuildException(sprintf('Source file %s cannot be found', $sourcePath));
+        $twig = $this->getTwig();
+
+        try {
+            $markdown = $this->filesystem->read($sourcePath);
+        } catch (FilesystemException | UnableToReadFile $exception) {
+            throw new BuildException(sprintf('Cannot load markdown docs file at %s', $sourcePath));
         }
 
-        // Calculate destination path
-        $destination = preg_replace('/\.md$/','.html', $source);
+        $frontMatter = YamlFrontMatter::parse($markdown);
+        $html =  $this->markdown->text($frontMatter->body());
 
-        $html = $this->markdown->parseFile($sourcePath);
+        // Parse example fragment: <example title="Button" src="components/button.html.twig" data="buttonText: A button">
+        $this->example->setCurrentFile($sourcePath);
+        $html = $this->example->parse($html);
 
-        $templateFolder = str_replace($this->getSourcePath(), '', dirname($source));
+        // Parse example code fragment: <exampleHtml src="components/button.html.twig">
+        $this->exampleHtml->setCurrentFile($sourcePath);
+        $html = $this->exampleHtml->parse($html);
 
-        // @todo SpecialFunctions has moved, review this
-        //$html = $this->markdown->parseSpecialFunctions($html, $templateFolder, dirname($sourcePath), $this->getDestPath($templateFolder));
-
+        // Build Twig data
         $data = [
-            'content'   => $html,
+            'contents' => $html,
         ];
-
-        foreach ($this->markdown->getAllFrontMatter() as $name => $value) {
+        foreach ($frontMatter->matter() as $name => $value) {
+            if ($name === 'contents') {
+                continue;
+            }
             $data[$name] = $value;
         }
 
-        $html = $this->twig->render('templates/page.html.twig', $data);
-        file_put_contents($this->getDestPath($destination), $html);
+        $data['navigation'] = $this->config->getNavigation($this->config->getDistUrl($destination));
+        $html = $twig->render('@DesignSystem/content-main.html.twig', $data);
 
-        return $this->getDestPath($destination);
+        $this->filesystem->write($destination, $html);
+        if ($this->output->isVerbose()) {
+            $this->output->text('* ' . $destination);
+        }
     }
 
-    /**
-     * Create destination folder
-     * @param string $folder
-     * @throws BuildException
-     */
-    public function createDestFolder(string $folder)
+    public function buildTemplates()
     {
-        $folder = $this->getDestPath($folder);
-        if (is_dir($folder)) {
-            return;
-        }
-        if (!mkdir($folder, 0777, true)) {
-            throw new BuildException(sprintf('Cannot create new folder at %s', $folder));
-        }
+        // @todo build example full page templates
+
     }
 
-    /**
-     * Copy file from source to destination
-     * @param string $sourcePath Source file
-     * @param string $destination Destination file
-     * @throws BuildException
-     */
-    public function copyFile(string $source, string $destination = null)
-    {
-        if (!copy($source, $destination)) {
-            throw new BuildException(sprintf('Cannot copy source file %s to destination %s', $source, $destination));
-        }
-    }
+    // OLD
+
 
     /**
      * Render a template and output to destination folder
@@ -294,59 +319,6 @@ class Build
                 $x++;
             }
         }
-        return $x;
-    }
-
-    /**
-     * Build markdown files as HTML
-     * @return int
-     * @throws BuildException
-     */
-    public function buildPages(): int
-    {
-        $exclude = [
-            'assets',
-            'examples',
-            'templates'
-        ];
-        $x = 0;
-
-        $this->verboseInfo('Parsing folder: %s', $this->getSourcePath());
-        $sourceDir = new \DirectoryIterator($this->getSourcePath());
-        foreach ($sourceDir as $fileInfo) {
-            if ($fileInfo->isDot()) {
-                continue;
-            }
-
-            // Parse Markdown file
-            if ($fileInfo->getExtension() === 'md') {
-                $this->verboseInfo('Building markdown page: %s', $fileInfo->getFilename());
-                $dest = $this->buildMarkdownPage($fileInfo->getFilename());
-                $x++;
-            }
-
-            // Parse Markdown folder
-            if ($fileInfo->isDir() && !in_array($fileInfo->getFilename(), $exclude)) {
-
-                $childDirName = $fileInfo->getFilename();
-                $this->createDestFolder($childDirName);
-
-                $this->verboseInfo('Parsing folder: %s', $fileInfo->getPathname());
-                $childDir = new \DirectoryIterator($fileInfo->getPathname());
-                foreach ($childDir as $childFileInfo) {
-                    if ($childFileInfo->isDot()) {
-                        continue;
-                    }
-                    if ($childFileInfo->getExtension() === 'md') {
-                        $this->verboseInfo('Building markdown page: %s', $childFileInfo->getFilename());
-                        $dest = $this->buildMarkdownPage($childDirName . '/' . $childFileInfo->getFilename());
-                        $x++;
-                    }
-                }
-
-            }
-        }
-
         return $x;
     }
 

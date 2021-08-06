@@ -1,0 +1,27 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+
+// Error reporting
+error_reporting(E_ALL);
+ini_set('display_errors', 'On');
+ini_set('display_startup_errors', 'On');
+ini_set('log_errors', 'On');
+
+require __DIR__ . '/../vendor/autoload.php';
+
+use Studio24\DesignSystem\Command\BuildCommand;
+use Studio24\DesignSystem\Command\InitCommand;
+use Symfony\Component\Console\Application;
+
+$application = new Application();
+
+// Default command
+$build = new BuildCommand();
+$application->add($build);
+$application->setDefaultCommand($build->getName());
+
+// Other commands
+$application->add(new InitCommand());
+
+$application->run();

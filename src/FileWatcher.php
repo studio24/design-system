@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Studio24\Apollo;
+namespace Studio24\DesignSystem;
 
-use Studio24\Apollo\Exception\FileWatcherException;
+use Studio24\DesignSystem\Exception\FileWatcherException;
 
 class FileWatcher
 {
