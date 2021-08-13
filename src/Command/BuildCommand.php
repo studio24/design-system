@@ -90,7 +90,9 @@ class BuildCommand extends Command
 
         // Templates
         if ($this->doTemplates()) {
-
+            $io->text('Building templates...');
+            $build->buildTemplates();
+            $io->info('Templates built');
         }
 
         // Finish up

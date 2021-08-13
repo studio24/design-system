@@ -10,14 +10,15 @@ $config = array (
   'debug' => true,
   'twig_render' => 
   array (
-    'Components' => 'templates/components',
-    'Templates' => 'templates/examples',
+    'examples',
+    'single.html.twig',
   ),
   'navigation' => 
   array (
     'Home' => '/',
-    'Styles' => 'styles/',
-    'Components' => '@twig_render:Components',
-    'Templates' => '@twig_render:Templates',
+    'Styles' => '/styles/',
+    'Components' => '/components/',
+    'Guidelines' => '/guidelines/',
+    'Templates' => '/templates/',
   ),
 );

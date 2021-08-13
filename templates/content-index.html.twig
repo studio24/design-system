@@ -1,0 +1,9 @@
+{% extends "@DesignSystem/one-col.html.twig" %}
+
+{% block main %}
+	<ul>
+	{% for item in sibling_navigation %}
+		<li><a href="{{ item.url }}">{{ item.title }}</a></li>
+	{% endfor %}
+	</ul>
+{% endblock %}

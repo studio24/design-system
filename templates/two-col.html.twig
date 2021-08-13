@@ -28,8 +28,13 @@
 		<div class="l-center l-sidebar">
 			<div>
 				<div class="sidebar">
-					{% block sidemenu %}
-					{% endblock %}
+					<nav class="section-nav">
+						<ul class="clean-list" role="list">
+						{% for item in sibling_navigation %}
+							<li class="{% if current_url == item.url %}active{% endif %}"><a class="nav-link" href="{{ item.url }}">{{ item.title }}</a></li>
+						{% endfor %}
+						</ul>
+					</nav>
 				</div>
 				<div class="not-sidebar">
 					<main id="main" class="l-stack">

@@ -21,6 +21,10 @@ title: Page title
 My documentation text here
 ```
 
+Required fields are:
+
+* `title` - sets the H1 title and navigation title for this page
+
 ## Outputting code examples
 
 You can output code examples in your markdown files via the custom HTML `example` tag:
@@ -79,3 +83,9 @@ Or you can use a PHP file which must include a `$data` variable containing an ar
 ```
 
 All of these methods pass the data to the Twig template, allowing you to construct code examples with data variables.
+
+## Sibling navigation
+
+Links to sibling pages (in a directory) are automatically outputted to the template in the sidebar.
+Please note, this is not done for the root directory, since it's assumed you will have a `README.md` file here. You will 
+need to add any links to root-level documentation pages yourself in your markdown documentation pages.

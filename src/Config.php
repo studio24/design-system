@@ -30,14 +30,12 @@ class Config
         'docs_path'         => 'docs/',
         'templates_path'    => 'templates/',
         'twig_render'       => [
-            'Components' => 'templates/components',
-            'Templates' => 'templates/examples',
         ],
         'navigation'        => [
-            'Home'          => 'README.md',
-            'Styles'        => 'styles/',
-            'Components'    => '@twig_render:Components',
-            'Templates'     => '@twig_render:Templates',
+            'Home'          => '/',
+            'Styles'        => '/styles/',
+            'Components'    => '/components/',
+            'Templates'     => '/templates/',
         ],
     ];
 
@@ -69,13 +67,22 @@ class Config
      */
     public function getNavigation(string $currentUrl): array
     {
-        // @todo
         $navigation = [];
-        foreach ($this->get('navigation') as $label => $item) {
+        foreach ($this->get('navigation') as $label => $url) {
+            $active = false;
+            if ($url === '/') {
+                // Only mark homepage as active for homepage
+                if ($currentUrl === '/') {
+                    $active = true;
+                }
+            } else {
+                // Mark other sections as active for any child page
+                $active = preg_match('!^' . preg_quote($url, '!') . '!', $currentUrl);
+            }
             $navigation[] = [
-                'label' => $label,
-                'link'  => $item,
-                'active' => ($item === $currentUrl)
+                'label'  => $label,
+                'url'    => $url,
+                'active' => $active
             ];
         }
         return $navigation;
@@ -120,6 +127,18 @@ class Config
                 $this->config[$name] = $config[$name];
             }
         }
+    }
+
+    /**
+     * Convert Twig template name into an HTML filename
+     * @param string $filepath Path to Twig file or filename
+     * @return string Filename only, ending .html
+     */
+    public function getHtmlFilename(string $filepath): string
+    {
+        $filepath = basename($filepath, '.twig');
+        $filepath = basename($filepath, '.html');
+        return $filepath . '.html';
     }
 
     /**
@@ -185,63 +204,36 @@ class Config
 
     /**
      * Save a copy of the default config file to path, if it does not exist
-     * @param string $path Full path to save file to
+     * @param string $absolutePath Full path to save file to
      * @return bool Whether file was created
      * @throws ConfigException
      */
-    public static function saveDefaultConfigFile(string $path): bool
+    public static function saveDefaultConfigFile(string $absolutePath): bool
     {
-        if (file_exists($path)) {
+        if (file_exists($absolutePath)) {
             return false;
         }
-
-        $config = new Config(dirname($path));
-        $defaultConfig = $config->config;
-        $php = '$config = ' . var_export($defaultConfig, true) . ';';
-        $output = <<<EOD
-<?php
-
-/**
- * Design System configuration
- *
- * Overrides default config settings
- * @see Studio24\DesignSystem\Config::\$config
- */
-$php
-
-EOD;
-
-        $result = file_put_contents($path, $output) ;
-        if ($result === false) {
-            throw new CreateFileException(sprintf('Cannot save default config file at path %s', $path));
+        if (!copy(__DIR__ . '/../templates/config/design-system-config.php', $absolutePath)) {
+            throw new CreateFileException(sprintf('Cannot save default config file at path %s', $absolutePath));
         }
         return true;
     }
 
     /**
      * Save build assets bash script to path, if it does not exist
-     * @param string $path
+     * @param string $absolutePath
      * @return bool Whether file was created
      * @throws ConfigException
      */
-    public static function saveBuildAssetsFile(string $path): bool
+    public static function saveBuildAssetsFile(string $absolutePath): bool
     {
-        if (file_exists($path)) {
+        if (file_exists($absolutePath)) {
             return false;
         }
-
-        $output = <<<EOD
-#!/usr/bin/env bash
-
-# Run build commands
-
-EOD;
-
-        $result = file_put_contents($path, $output);
-        if ($result === false) {
-            throw new CreateFileException(sprintf('Cannot save build assets file at path %s', $path));
+        if (!copy(__DIR__ . '/../templates/config/design-system-build.sh', $absolutePath)) {
+            throw new CreateFileException(sprintf('Cannot save build assets file at path %s', $absolutePath));
         }
-        chmod($path, 0755);
+        chmod($absolutePath, 0755);
         return true;
     }
 

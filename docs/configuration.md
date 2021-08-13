@@ -36,34 +36,63 @@ Default value: `templates/`
 
 ### twig_render
 
-TODO
+Sometimes you want to render complete or partial Twig templates outside of the doc [code examples](writing-documentation.md#outputting-code-examples).  
 
-Array of name => template paths to render as full page templates. Template paths are relative to `templates_path`. 
+To do this pass an array of directory paths or individual templates (relative to your templates folder) to the 
+`twig_render` configuration variable and these will be rendered by Twig into HTML templates and stored in 
+`_dist/code/templates`.
 
-Default value: 
+Default value (no templates to render):
 
 ```php
 'twig_render' => [
-    'Components' => 'components',
-    'Templates'  => 'examples',
 ],
 ```
 
+You can pass data to these templates by creating a PHP file with the same name as the template, suffixed with `.php`. 
+This PHP file must contain a `$data` variable which contains an array of data passed to the template.
+
+For example:
+
+```php
+'twig_render' => [
+    'examples'
+],
+```
+
+This will render all `*.twig` templates found in the directory path `templates/examples`
+
+With the following example files:
+
+```
+my-project-root
+├── templates   
+│   └── examples 
+│       └── one-col-page.html.twig
+│       └── two-col-page.html.twig
+│       └── two-col-page.html.twig.php
+```
+
+The template `two-col-page.html.twig` will be passed the `$data` array found in `two-col-page.html.twig.php`  
+
 ### navigation
 
-TODO
+Primary navigation for the design system, an array of labels and links. Please note these 
+links need to work on every page, so make these relative to the site root (/).
 
 Default value: 
 
 ```php
 'navigation'        => [
-    'Home'          => 'README.md',
-    'Styles'        => 'styles/',
-    'Components'    => '@twig_render:Components',
-    'Templates'     => '@twig_render:Templates',
+    'Home'          => '/',
+    'Styles'        => '/styles/',
+    'Components'    => '/components/',
+    'Templates'     => '/templates/',
 ],
 ```
 
+Please note sibling navigation is automatically displayed on pages in the left-hand column. A natural sort 
+order is used to sort the child pages.
 
 ---
 

@@ -46,8 +46,8 @@ You can either use the default setup, or [customise the configuration file](conf
 
 It's recommended you update the following configuration properties to ensure the Design System builds properly:
 
-* [header_logo](configuration.md#footer)
-* [footer](configuration.md#footer)
+* [navigation](configuration.md#navigation)
+* [twig_render](configuration.md#twig_render)
 
 ## Assets build script
 
@@ -56,6 +56,11 @@ work. You need to customise this to include the correct commands.
 
 Please note any built assets need to be saved in `_dist/assets/`. Please do not save built assets 
 to the `_dist/assets/design-system/` folder, which is used for the design system assets.
+
+## Build templates
+
+To build any other templates, outside of code examples in your docs, you can use the 
+[`twig_render` configuration setting](configuration.md#twig_render).
 
 ## Custom design system templates
 

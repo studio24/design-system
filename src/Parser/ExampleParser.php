@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Studio24\DesignSystem\Parser;
 
+use Studio24\DesignSystem\Build;
 use Studio24\DesignSystem\Config;
 use Studio24\DesignSystem\Exception\BuildException;
 use Studio24\DesignSystem\Exception\DataArrayMissingException;
@@ -78,9 +79,8 @@ class ExampleParser extends ParserAbstract
         $htmlPage = $this->twig->render('@DesignSystem/example-code.html.twig', $data);
 
         // Save code template
-        $filename = basename($filename, '.twig');
-        $filename = basename($filename, '.html');
-        $destination = $this->config->buildPath(Config::DIST_PATH, 'code/' . $filename . '.html');
+        $filename = $this->config->getHtmlFilename($filename);
+        $destination = $this->config->buildPath(Build::DIR_CODE_EXAMPLES, $filename);
         $url = $this->config->getDistUrl($destination);
         try {
             $this->filesystem->write($destination, $htmlPage);
