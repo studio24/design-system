@@ -1,9 +1,13 @@
 # Design system
 
-Simple tool to build a static design system website using [Twig](https://twig.symfony.com/) for page templating. 
+Simple tool to build a static design system website using [Twig](https://twig.symfony.com/) for page templating.
+This allows you to create templates in Twig and document these next to your templates. You can then use the templates in 
+your web project and output static design system documentation. We use this system for the W3C Design System, in their 
+[template bundle repo](https://github.com/w3c/w3c-website-templates-bundle).
+
 Key features:
 
-* Builds design system based on markdown documentation and Twig templates
+* Builds design system based on Markdown documentation and Twig templates
 * Use sample data to help build Twig templates
 * Runs any local asset build process to build frontend assets
 
@@ -31,12 +35,12 @@ To build the design system website files:
 You can then view the design system website via:
 
 ```bash
-php -S localhost:8000 -t dist
+php -S localhost:8000 -t _dist
 ```
 
 ## Documentation
 
-See [docs](docs/README.md) for [setup](docs/setup.md) and [usage](docs/usage.md) instructions.
+See [docs](docs/README.md) for full details on how to use this tool.
 
 ## License
 

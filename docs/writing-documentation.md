@@ -35,8 +35,15 @@ You can output code examples in your markdown files via the custom HTML `example
 
 This renders the template, saves this to a file and embeds it in your doc page.
 
-The 1st argument is the title of your code example, the 2nd argument is the path to the code Twig template, relative
-to your templates folder (by default this is `templates/`).
+Required attributes for the `<example>` tag are:
+* `title` - title of your code example
+* `src` - path to the code Twig template, relative to your templates folder (by default this is `templates/`) 
+
+Optional attributes for the `<example>` tag are:
+* `data`
+* `data-src`
+
+See [passing data to your code template](#passing-data-to-your-code-template).
 
 You can also output the actual HTML to your page via:
 
@@ -44,8 +51,10 @@ You can also output the actual HTML to your page via:
 <exampleHtml src="components/tables.html.twig">
 ```
 
-This displays the HTML in a `<pre><code>` tag and uses [HighlightJS](https://highlightjs.org/) for code formatting.
-Please note, you have to first use the `example` tag for `exampleHtml` to work.
+This displays the HTML in `<pre><code>` tags and uses [HighlightJS](https://highlightjs.org/) for code formatting.
+
+The `<exampleHtml>` tag only requires the src attribute. Please note, you have to first use the `<example>` tag to 
+generate the HTML code for `<exampleHtml>` to work.
 
 ### Custom template for code examples
 By default, the example code is outputted to the `_dist/code/` folder and is embedded within the `example-code.html.twig`
@@ -54,11 +63,11 @@ styles. You can do this by saving your own example code template at `templates/d
 You can copy the default template to customise via:
 
 ```bash
-cp vendor/studio24/design-system/templates/example-code.html.twig templates/example-code.html.twig
+cp vendor/studio24/design-system/templates/example-code.html.twig templates/design-system/example-code.html.twig
 ```
 
 ### Passing data to your code template
-You can pass data to your code template via the 3rd argument:
+You can pass data to your code template via the data attribute:
 
 #### Inline data variables
 ```markdown
@@ -87,5 +96,6 @@ All of these methods pass the data to the Twig template, allowing you to constru
 ## Sibling navigation
 
 Links to sibling pages (in a directory) are automatically outputted to the template in the sidebar.
+
 Please note, this is not done for the root directory, since it's assumed you will have a `README.md` file here. You will 
 need to add any links to root-level documentation pages yourself in your markdown documentation pages.

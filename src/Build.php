@@ -22,7 +22,7 @@ use Twig\Environment;
 class Build
 {
     const DIR_CODE_EXAMPLES = Config::DIST_PATH . '/code/examples';
-    const DIR_TEMPLATES = Config::DIST_PATH . '/code/templates';
+    const DIR_CODE_TEMPLATES = Config::DIST_PATH . '/code/templates';
 
     private Config $config;
     private SymfonyStyle $output;
@@ -353,13 +353,25 @@ class Build
         }
     }
 
+    /**
+     * Build full page templates and link to design system site
+     *
+     * @throws BuildException
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws \Twig\Error\LoaderError
+     * @throws \Twig\Error\RuntimeError
+     * @throws \Twig\Error\SyntaxError
+     */
     public function buildTemplates()
     {
-        $templates = $this->config->get('twig_render');
+        $templates = $this->config->get('build_templates');
         if (!is_array($templates)) {
             return;
         }
 
+        // Render templates found in config variable 'build_templates'
+        $savedTemplates = [];
         foreach ($templates as $name => $path) {
             $rootPath = $this->config->buildPath($this->config->get('templates_path'), $path);
 
@@ -367,7 +379,8 @@ class Build
             if ($this->filesystem->fileExists($rootPath)) {
                 if ($this->isTwigFile($path)) {
                     $data = $this->loadTemplateData($path);
-                    $this->renderTemplateToDest($path, Build::DIR_TEMPLATES, $data);
+                    $destination = $this->renderTemplateToDest($path, Build::DIR_CODE_TEMPLATES, $data);
+                    $savedTemplates[] = $destination;
                 }
                 continue;
             }
@@ -380,12 +393,73 @@ class Build
                 foreach ($listing as $item) {
                     if ($item instanceof \League\Flysystem\FileAttributes && $this->isTwigFile($item->path())) {
                         $data = $this->loadTemplateData($item->path());
-                        $this->renderTemplateToDest($item->path(), Build::DIR_TEMPLATES, $data);
+                        $twigPath = preg_replace('!^' . preg_quote($this->config->get('templates_path')) . '!', '', $item->path());
+                        $destination = $this->renderTemplateToDest($twigPath, Build::DIR_CODE_TEMPLATES, $data);
+                        $savedTemplates[] = $destination;
                     }
                 }
             } catch (FilesystemException $exception) {
                 throw new BuildException(sprintf('Cannot build templates from directory %s, error: %s', $path, $exception->getMessage()));
             }
+        }
+
+        // Build index page
+        $templateLinks = [];
+        $groupTemplatesLinks = [];
+        foreach ($savedTemplates as $destination) {
+            $destination = preg_replace('!^' . preg_quote(Build::DIR_CODE_TEMPLATES) . '!', '', $destination);
+            $destination = ltrim($destination, '/');
+            $directory = dirname($destination);
+            $label = basename($destination);
+            $url = $this->config->getDistUrl($destination);
+
+            // Top-level templates
+            if ($directory === '.') {
+                $templateLinks[] = [
+                    'title' => $label,
+                    'url' => $url,
+                ];
+                continue;
+            }
+
+            // Templates grouped buy sub-directory
+            if (!isset($groupTemplatesLinks[$directory])) {
+                $groupTemplatesLinks[$directory] = [];
+            }
+            $groupTemplatesLinks[$directory][] = [
+                'title' => $label,
+                'url' => $url,
+            ];
+        }
+
+        // Sort templates
+        uasort($templateLinks, function($a, $b){
+            return strnatcmp($a['title'], $b['title']);
+        });
+        foreach ($groupTemplatesLinks as $directory => &$children) {
+            uasort($children, function($a, $b){
+                return strnatcmp($a['title'], $b['title']);
+            });
+        }
+
+        // Render template index page
+        $destination = $this->config->buildPath(Build::DIR_CODE_TEMPLATES, 'index.html');
+        $currentUrl = $this->config->getDistUrl($destination);
+        $data = [
+            'templates' => $templateLinks,
+            'group_templates' => $groupTemplatesLinks,
+            'current_url' => $currentUrl,
+            'navigation' => $this->config->getNavigation($currentUrl),
+        ];
+        $html = $this->getTwig()->render('@DesignSystem/content-templates.html.twig', $data);
+        try {
+            $this->filesystem->write($destination, $html);
+            if ($this->output->isVerbose()) {
+                $this->output->text('* ' . $destination);
+            }
+
+        } catch (FilesystemException | UnableToWriteFile $exception) {
+            throw new BuildException(sprintf('Cannot render template index to destination %s, error: %s', $destination, $exception->getMessage()));
         }
     }
 
@@ -400,7 +474,7 @@ class Build
     }
 
     /**
-     * Load template data for a template path
+     * Load template data array to pass to Twig, if exists
      * @param string $templatePath
      * @return array
      * @throws FilesystemException
@@ -421,18 +495,24 @@ class Build
      * Render a template and output to destination folder
      * @param string $templatePath Config to template file, relative to template root
      * @param string $destFolder Folder to save outputted file to, relative to project root
+     * @return string Destination path template saved to
      * @throws BuildException
      * @throws \Twig\Error\LoaderError
      * @throws \Twig\Error\RuntimeError
      * @throws \Twig\Error\SyntaxError
      */
-    public function renderTemplateToDest(string $templatePath, string $destFolder, array $data = [])
+    public function renderTemplateToDest(string $templatePath, string $destFolder, array $data = []): string
     {
         $twig = $this->getTwig();
 
         // Calculate destination path
+        $directory = dirname($templatePath);
         $filename = $this->config->getHtmlFilename($templatePath);
-        $destination = $this->config->buildPath($destFolder, $filename);
+        if ($directory !== '.') {
+            $destination = $this->config->buildPath($destFolder, $directory . DIRECTORY_SEPARATOR . $filename);
+        } else {
+            $destination = $this->config->buildPath($destFolder, $filename);
+        }
 
         $html = $twig->render($templatePath, $data);
         try {
@@ -440,6 +520,8 @@ class Build
             if ($this->output->isVerbose()) {
                 $this->output->text('* ' . $destination);
             }
+            return $destination;
+
         } catch (FilesystemException | UnableToWriteFile $exception) {
             throw new BuildException(sprintf('Cannot render template file %s to destination %s, error: %s', $templatePath, $destination, $exception->getMessage()));
         }

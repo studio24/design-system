@@ -29,13 +29,11 @@ class Config
         'assets_build_command' => './' . self::DEFAULT_ASSETS_BUILD_SCRIPT,
         'docs_path'         => 'docs/',
         'templates_path'    => 'templates/',
-        'twig_render'       => [
+        'build_templates'   => [
         ],
         'navigation'        => [
             'Home'          => '/',
-            'Styles'        => '/styles/',
-            'Components'    => '/components/',
-            'Templates'     => '/templates/',
+            'Templates'     => '/code/templates/',
         ],
     ];
 

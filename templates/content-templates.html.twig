@@ -1,0 +1,23 @@
+{% extends "@DesignSystem/one-col.html.twig" %}
+
+{% block main %}
+	<h1>Example templates</h1>
+
+	<ul>
+	{% for item in templates %}
+		{% for item in templates %}
+			<li><a href="{{ item.url }}">{{ item.title }}</a></li>
+		{% endfor %}
+	{% endfor %}
+	</ul>
+
+	{% for group, items in group_templates %}
+		<h2>{{ group }}</h2>
+		<ul>
+		{% for item in items %}
+			<li><a href="{{ item.url }}">{{ item.title }}</a></li>
+		{% endfor %}
+		</ul>
+	{% endfor %}
+
+{% endblock %}

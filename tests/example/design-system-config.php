@@ -6,19 +6,18 @@
  * Overrides default config settings
  * @see Studio24\DesignSystem\Config::$config
  */
-$config = array (
-  'debug' => true,
-  'twig_render' => 
-  array (
-    'examples',
-    'single.html.twig',
-  ),
-  'navigation' => 
-  array (
-    'Home' => '/',
-    'Styles' => '/styles/',
-    'Components' => '/components/',
-    'Guidelines' => '/guidelines/',
-    'Templates' => '/templates/',
-  ),
-);
+$config = [
+    'debug'             => true,
+    'build_templates'   => [
+        'examples',
+        'single.html.twig',
+    ],
+    'navigation'        => [
+        'Home' => '/',
+        'Styles' => '/styles/',
+        'Components' => '/components/',
+        'Guidelines' => '/guidelines/',
+        'Templates' => '/code/templates/',
+    ],
+];
+

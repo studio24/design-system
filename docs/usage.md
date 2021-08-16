@@ -46,14 +46,14 @@ You can specify one or many actions by concatenating them together, e.g.
 or:
 
 ```
-./vendor/bin design-system -cp
+./vendor/bin design-system -cpt
 ```
 
 ## View the design system website
 You can view this via the in-built PHP server at http://localhost:8000 via:
 
 ```bash
-php -S localhost:8000 -t dist
+php -S localhost:8000 -t _dist
 ```
 
 ## TODO: Watch

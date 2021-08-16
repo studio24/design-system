@@ -1,6 +1,6 @@
 {
     "name": "studio24/design-system",
-    "description": "PHP based build system for a static Design System, based on the Apollo CSS framework",
+    "description": "PHP based build system for a static Design System, based on Twig",
     "type": "library",
     "license": "MIT",
     "require": {
