@@ -61,18 +61,6 @@ The template `one-col-page.html.twig` will be passed the `$data` array found in 
 
 ## Other configuration variables
 
-### debug
-
-Enable or disable debug mode for Twig templating.
-
-Default value: `false` 
-
-### cache_path
-
-Cache path for Twig templates. If null, then uses the system temp directory.
-
-Default value: `null`
-
 ### assets_build_command
 
 Command to run to build frontend assets for your templates, by default this calls a shell script

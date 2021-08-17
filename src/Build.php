@@ -77,16 +77,6 @@ class Build
             return $this->twig;
         }
 
-        $options = [];
-        if ($this->config->has('cache_path')) {
-            $options = ['cache' => $this->config->getFullPath('cache_path')];
-        } else {
-            $options = ['cache' => sys_get_temp_dir()];
-        }
-        if ($this->config->get('debug')) {
-            $options['debug'] = true;
-        }
-
         // Default template path for Twig templates
         $loader = new FilesystemLoader([
             $this->config->getFullPath('templates_path'),
@@ -103,6 +93,7 @@ class Build
         $paths[] = __DIR__ . '/../templates';
         $loader->setPaths($paths, 'DesignSystem');
 
+        $options = ['debug' => true];
         $this->templatesTwig = new Environment($loader, $options);
         return $this->templatesTwig;
     }
@@ -272,6 +263,11 @@ class Build
 
         // Build pages
         foreach ($pages as $location => $children) {
+
+            // Do we need an index page?
+
+            // Is there more than one page in this location? (one-col, two-col template)
+
             // Index page (don't generate for root)
             if ($location !== "") {
                 $this->buildIndexPage($location, $siblingNavigation[$location]);

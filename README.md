@@ -35,7 +35,7 @@ To build the design system website files:
 To see what files the design system is outputting pass the `-v` verbose option.
 
 ```
-./vendor/bin/design-system -v
+./vendor/bin/design-system -v 
 ```
 
 You can then view the design system website via:

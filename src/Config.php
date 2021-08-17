@@ -24,8 +24,6 @@ class Config
      * @var array
      */
     private array $config = [
-        'debug'             => false,
-        'cache_path'        => null,
         'assets_build_command' => './' . self::DEFAULT_ASSETS_BUILD_SCRIPT,
         'docs_path'         => 'docs/',
         'templates_path'    => 'templates/',
