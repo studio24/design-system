@@ -29,7 +29,13 @@ If you already have this in your project then just run `composer install` to dow
 To build the design system website files:
 
 ```
-./vendor/bin design-system
+./vendor/bin/design-system
+```
+
+To see what files the design system is outputting pass the `-v` verbose option.
+
+```
+./vendor/bin/design-system -v
 ```
 
 You can then view the design system website via:
