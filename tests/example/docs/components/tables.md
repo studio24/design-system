@@ -1,6 +1,4 @@
----
-title: Tables
----
+# Tables
 
 ## Usage notes on tables
 

@@ -8,6 +8,7 @@ use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemException;
 use League\Flysystem\Local\LocalFilesystemAdapter;
 use League\Flysystem\UnableToWriteFile;
+use Masterminds\HTML5;
 use Parsedown;
 use Spatie\YamlFrontMatter\YamlFrontMatter;
 use Studio24\DesignSystem\Exception\BuildException;
@@ -15,6 +16,7 @@ use Studio24\DesignSystem\Exception\ConfigException;
 use Studio24\DesignSystem\Exception\AssetsException;
 use Studio24\DesignSystem\Parser\ExampleHtmlParser;
 use Studio24\DesignSystem\Parser\ExampleParser;
+use Studio24\DesignSystem\Parser\HtmlParser;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Twig\Loader\FilesystemLoader;
 use Twig\Environment;
@@ -222,21 +224,26 @@ class Build
                     $dir = preg_replace('!^docs!', '', $dirname);
                     $destination =  Config::DIST_PATH . $dir . DIRECTORY_SEPARATOR . $filename . '.html';
 
-                    // Get page title from front matter
+                    // Get page title from first markdown heading, or filename
                     $markdown = $this->filesystem->read($path);
-                    $frontMatter = YamlFrontMatter::parse($markdown);
+                    if (preg_match('/[#]+\s?(.+)/', $markdown, $m)) {
+                        $title = $m[1];
+                    } else {
+                        $title = $filename;
+                    }
 
                     // Build hierarchy of pages
                     $location = trim($dir, '/');
                     if (!isset($pages[$location])) {
                         $pages[$location] = [];
                     }
+
                     $pages[$location][] = [
-                        'location' => $location,
-                        'title' => $frontMatter->matter('title'),
-                        'source' => $path,
-                        'destination' => $destination,
-                        'link' => preg_replace('/^_dist/', '', $destination)
+                        'location'      => $location,
+                        'title'         => $title,
+                        'source'        => $path,
+                        'destination'   => $destination,
+                        'link'          => preg_replace('/^_dist/', '', $destination)
                     ];
                 }
             }
@@ -319,8 +326,7 @@ class Build
             throw new BuildException(sprintf('Cannot load markdown docs file at %s', $sourcePath));
         }
 
-        $frontMatter = YamlFrontMatter::parse($markdown);
-        $html =  $this->markdown->text($frontMatter->body());
+        $html =  $this->markdown->text($markdown);
 
         // Parse example fragment: <example title="Button" src="components/button.html.twig" data="buttonText: A button">
         $this->example->setCurrentFile($sourcePath);
@@ -335,13 +341,6 @@ class Build
             'contents'           => $html,
             'sibling_navigation' => $siblingNavigation,
         ];
-        foreach ($frontMatter->matter() as $name => $value) {
-            if ($name === 'contents') {
-                continue;
-            }
-            $data[$name] = $value;
-        }
-
         $data['current_url'] = $this->config->getDistUrl($destination);
         $data['navigation'] = $this->config->getNavigation($data['current_url']);
 
@@ -480,6 +479,7 @@ class Build
 
     /**
      * Load template data array to pass to Twig, if exists
+     *
      * @param string $templatePath
      * @return array
      * @throws FilesystemException

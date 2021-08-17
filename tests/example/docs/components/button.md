@@ -1,8 +1,4 @@
----
-title: Button
-nav: button
-layout: content-components.njk
----
+# Button
 
 Where and how to use buttons and their function.
 

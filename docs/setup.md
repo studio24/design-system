@@ -47,7 +47,7 @@ You can either use the default setup, or [customise the configuration file](conf
 It's recommended you update the following configuration properties to ensure the Design System builds properly:
 
 * [navigation](configuration.md#navigation) - top-level navigation links
-* [twig_render](configuration.md#twig_render) - full page templates to render
+* [build_templates](configuration.md#build_templates) - full page templates to render
 
 ## Assets build script
 

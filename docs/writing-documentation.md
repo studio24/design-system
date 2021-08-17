@@ -10,20 +10,8 @@ GitHub and is also used as the index page on the design system site.
 
 This system supports [GitHub flavoured Markdown](https://guides.github.com/features/mastering-markdown/).
 
-## Front matter
-At the top of your Markdown file, you need to set the page title in the front matter:
-
-```markdown
----
-title: Page title
----
-
-My documentation text here
-```
-
-Required fields are:
-
-* `title` - sets the H1 title and navigation title for this page
+The first Markdown heading in the doc file is used as the page title in secondary navigation, or the filename is used if
+no headings exist.
 
 ## Outputting code examples
 

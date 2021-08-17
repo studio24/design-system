@@ -39,7 +39,7 @@ This PHP file must contain a `$data` variable which contains an array of data pa
 For example:
 
 ```php
-'twig_render' => [
+'build_templates' => [
     'examples'
 ],
 ```

@@ -1,5 +1,3 @@
----
-title: Guidelines
----
+# Guidelines
 
 Examples

@@ -40,13 +40,13 @@ You can also run only specific actions via the `--actions` or `-a` option. Avail
 You can specify one or many actions by concatenating them together, e.g.
 
 ```
-./vendor/bin design-system -c
+./vendor/bin design-system -a=c
 ```
 
 or:
 
 ```
-./vendor/bin design-system -cpt
+./vendor/bin design-system -a=cpt
 ```
 
 ## View the design system website
@@ -54,13 +54,4 @@ You can view this via the in-built PHP server at http://localhost:8000 via:
 
 ```bash
 php -S localhost:8000 -t _dist
-```
-
-## TODO: Watch
-
-TODO: Rebuild files on any changes and view static design system website locally:
-
-```bash
-# Please note this is not working yet and is in development
-php -S localhost:8000 -t dist watch.php
 ```
