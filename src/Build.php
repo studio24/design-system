@@ -8,6 +8,8 @@ use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemException;
 use League\Flysystem\Local\LocalFilesystemAdapter;
 use League\Flysystem\UnableToWriteFile;
+use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
+use League\Flysystem\Visibility;
 use Masterminds\HTML5;
 use Parsedown;
 use Spatie\YamlFrontMatter\YamlFrontMatter;
@@ -46,7 +48,20 @@ class Build
         $this->config = $config;
         $this->output = $output;
 
-        $adapter = new LocalFilesystemAdapter($config->getRootPath());
+        // Set default file permissions
+        $visibility = PortableVisibilityConverter::fromArray([
+            'file' => [
+                'public' => 0644,
+                'private' => 0600,
+            ],
+            'dir' => [
+                'public' => 0755,
+                'private' => 0700,
+            ],
+        ],
+        Visibility::PUBLIC);
+
+        $adapter = new LocalFilesystemAdapter($config->getRootPath(), $visibility);
         $this->filesystem = new Filesystem($adapter);
         $this->markdown = new Parsedown();
 
@@ -347,6 +362,9 @@ class Build
         }
         $html = $twig->render($template, $data);
 
+        $config = [
+            'visibility' => Visibility::PUBLIC,
+        ];
         $this->filesystem->write($destination, $html);
         if ($this->output->isVerbose()) {
             $this->output->text('* ' . $destination);
