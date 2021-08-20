@@ -43,8 +43,8 @@ class BuildCommand extends Command
                 'actions',
                 'a',
                 InputOption::VALUE_REQUIRED,
-                'Which actions to run ("c" = clean, "a" = assets, "p" = pages, "t" = templates)',
-                'capt'
+                'Which actions to run ("c" = clean, "a" = assets, "p" = layouts, "t" = templates)',
+                'cad'
             )
         ;
     }
@@ -59,6 +59,7 @@ class BuildCommand extends Command
         $this->actions = $input->getOption('actions');
         $rootPath = $input->getOption('path');
         $io->text(sprintf('Root path set to: %s', $rootPath));
+
         $config = new Config($rootPath, $input->getOption('config'));
         $io->text(sprintf('Config loaded from: %s', $input->getOption('config')));
         $build = new Build($config, $io);
@@ -81,18 +82,11 @@ class BuildCommand extends Command
             $io->success('Assets successfully built!');
         }
 
-        // Pages
-        if ($this->doPages()) {
-            $io->text('Building pages...');
-            $build->buildPages();
-            $io->info('Documentation pages built');
-        }
-
-        // Templates
-        if ($this->doTemplates()) {
-            $io->text('Building templates...');
-            $build->buildTemplates();
-            $io->info('Templates built');
+        // Docs
+        if ($this->doDocs()) {
+            $io->text('Building docs...');
+            $build->buildDocs();
+            $io->info('Docs layouts built');
         }
 
         // Finish up
@@ -113,13 +107,9 @@ class BuildCommand extends Command
         return strpos($this->actions, 'a') !== false;
     }
 
-    private function doPages(): bool
+    private function doDocs(): bool
     {
-        return strpos($this->actions, 'p') !== false;
+        return strpos($this->actions, 'd') !== false;
     }
 
-    private function doTemplates(): bool
-    {
-        return strpos($this->actions, 't') !== false;
-    }
 }

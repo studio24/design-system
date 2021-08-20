@@ -1,89 +1,33 @@
 # Writing documentation
 
 This design system built tool is based on the patterns used on the [GOVUK Design System](https://design-system.service.gov.uk/)
-which displays content pages with HTML embedded as example code.
+which is primarily documentation pages, with HTML embedded as example code.
+
+The idea is you write documentation files, and for all code examples you include these using custom `<example>` tags that 
+generate code examples.
 
 ## Markdown files
-Your documentation files are written in Markdown. You can organise your documentation in folders, 
-for the main index page in each folder, name this `README.md`. This ensures it renders on websites such as
-GitHub and is also used as the index page on the design system site.
 
-This system supports [GitHub flavoured Markdown](https://guides.github.com/features/mastering-markdown/).
+Your documentation files are written in Markdown. This system supports [GitHub flavoured Markdown](https://guides.github.com/features/mastering-markdown/).
 
-The first Markdown heading in the doc file is used as the page title in secondary navigation, or the filename is used if
-no headings exist.
-
-## Outputting code examples
-
-You can output code examples in your markdown files via the custom HTML `example` tag:
-
-```markdown
-<example title="Tables" src="components/tables.html.twig">
-```
-
-This renders the template, saves this to a file and embeds it in your doc page.
-
-Required attributes for the `<example>` tag are:
-* `title` - title of your code example
-* `src` - path to the code Twig template, relative to your templates folder (by default this is `templates/`) 
-
-Optional attributes for the `<example>` tag are:
-* `data`
-* `data-src`
-
-See [passing data to your code template](#passing-data-to-your-code-template).
-
-You can also output the actual HTML to your page via:
-
-```markdown
-<exampleHtml src="components/tables.html.twig">
-```
-
-This displays the HTML in `<pre><code>` tags and uses [HighlightJS](https://highlightjs.org/) for code formatting.
-
-The `<exampleHtml>` tag only requires the src attribute. Please note, you have to first use the `<example>` tag to 
-generate the HTML code for `<exampleHtml>` to work.
-
-### Custom template for code examples
-By default, the example code is outputted to the `_dist/code/` folder and is embedded within the `example-code.html.twig`
-template found within the Design System code. You can override this template, for example to load the correct
-styles. You can do this by saving your own example code template at `templates/design-system/example-code.html.twig`.
-You can copy the default template to customise via:
-
-```bash
-cp vendor/studio24/design-system/templates/example-code.html.twig templates/design-system/example-code.html.twig
-```
-
-### Passing data to your code template
-You can pass data to your code template via the data attribute:
-
-#### Inline data variables
-```markdown
-<example title="Tables" src="components/tables.html.twig" data="foo: bar, name: value">
-```
-
-The `data` attribute takes data properties in the form `name: value, name2: value2`, etc.
-
-#### Loading data from a JSON file
-You can also pass a file path to a JSON file containing a data structure, the file path should be relative
-to your templates folder.
-
-```markdown
-<example title="Tables" src="components/tables.html.twig" data-src="data/example.json">
-```
-
-#### Loading data from a PHP file
-Or you can use a PHP file which must include a `$data` variable containing an array of data.
-
-```markdown
-<example title="Tables" src="components/tables.html.twig" data-src="data/example.php">
-```
-
-All of these methods pass the data to the Twig template, allowing you to construct code examples with data variables.
+Please note the following rules for building documentation pages:
+* Only builds `.md` files
+* Any Markdown links to `.md` files are converted to links to `.html` pages
+* Your first heading is used as the navigation title in sibling navigation (or the filename is used if no headings exist)
+* If a page appears in the top navigation it does not appear in the sibling navigation
+* Add a `README.md` as your index page in each directory, if one is not included a simple HTML page with sibling navigation will be generated
 
 ## Sibling navigation
 
 Links to sibling pages (in a directory) are automatically outputted to the template in the sidebar.
 
-Please note, this is not done for the root directory, since it's assumed you will have a `README.md` file here. You will 
+Please note, this is not done for the root directory, since it's assumed you will have a `README.md` file here. You will
 need to add any links to root-level documentation pages yourself in your markdown documentation pages.
+
+## Outputting code examples
+
+See [code examples](code-examples.md).
+
+## Outputting color swatches
+
+See [color swatches](colors.md).

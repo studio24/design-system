@@ -18,7 +18,7 @@ Default value:
 ],
 ```
 
-### build_templates
+### build_templates KILL THESE
 
 Sometimes you want to render complete or partial Twig templates outside of the doc [code examples](writing-documentation.md#outputting-code-examples).
 

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Studio24\DesignSystem\Parser;
 
+use League\Flysystem\Filesystem;
 use Studio24\DesignSystem\Build;
 use Studio24\DesignSystem\Config;
 use Studio24\DesignSystem\Exception\BuildException;
@@ -10,12 +11,24 @@ use Studio24\DesignSystem\Exception\DataArrayMissingException;
 use Studio24\DesignSystem\Exception\InvalidFileException;
 use Studio24\DesignSystem\Exception\MissingAttributeException;
 use Studio24\DesignSystem\Exception\PathDoesNotExistException;
+use Symfony\Component\Console\Style\SymfonyStyle;
+use Twig\Environment;
 
 /**
- * Render <example> tags in documentation pages
+ * Render <example> tags in documentation layouts
  */
 class ExampleParser extends ParserAbstract
 {
+    public function __construct(Environment $twig, Config $config, SymfonyStyle $output, Filesystem $filesystem)
+    {
+        $this->setTwig($twig);
+        $this->setConfig($config);
+        $this->setOutput($output);
+        $this->setFilesystem($filesystem);
+
+        parent::__construct();
+    }
+
     /**
      * Return HTML tag to match for this parser
      * @return string
@@ -32,6 +45,7 @@ class ExampleParser extends ParserAbstract
      */
     public function render(array $params): string
     {
+        // Get params
         if (!isset($params['title'])) {
             throw new MissingAttributeException('You must set the title src, e.g. <example title="My component" src="filename.html">');
         }
@@ -40,6 +54,7 @@ class ExampleParser extends ParserAbstract
         }
         $title = $params['title'];
         $filename = $params['src'];
+        $standalone = isset($params['standalone']) ? true : false;
 
         // Load data, if passed in HTML tag
         if (isset($params['data']) && is_array($params['data'])) {
@@ -69,18 +84,24 @@ class ExampleParser extends ParserAbstract
             $data = [];
         }
 
-        // Render code template
+        // Render example template as HTML
         $rendered = $this->twig->render($filename, $data);
-        $this->html[$filename] = $rendered;
+        $html = $rendered;
 
-        // Generate standalone code example
-        $template = 'example-code.html.twig';
-        $data = ['title' => $title, 'html' => $rendered];
-        $htmlPage = $this->twig->render('@DesignSystem/example-code.html.twig', $data);
+        // If not standalone, embed code example in template
+        if (!$standalone) {
+            $data = [
+                'title' => $title,
+                'html' => $rendered
+            ];
+            $htmlPage = $this->twig->render('@DesignSystem/example-code.html.twig', $data);
+        } else {
+            $htmlPage = $html;
+        }
 
-        // Save code template
+        // Save example template
         $filename = $this->config->getHtmlFilename($filename);
-        $destination = $this->config->buildPath(Build::DIR_CODE_EXAMPLES, $filename);
+        $destination = $this->config->buildPath(Config::CODE_PATH, $filename);
         $url = $this->config->getDistUrl($destination);
         try {
             $this->filesystem->write($destination, $htmlPage);
@@ -90,31 +111,16 @@ class ExampleParser extends ParserAbstract
             }
 
         } catch (FilesystemException | UnableToWriteFile $exception) {
-            throw new BuildException(sprintf('Cannot save code template %s, error: %s', $filename, $exception->getMessage()));
+            throw new BuildException(sprintf('Cannot save example template to %s, error: %s', $filename, $exception->getMessage()));
         }
 
-        // Render example template & return it
+        // Return example HTML to docs page
         $data = [
             'title'  => $title,
             'url'    => $url,
+            'html'   => $html,
         ];
         return $this->twig->render('@DesignSystem/partials/_example.html.twig', $data);
-    }
-
-    /**
-     * Return rendered HTML for a previous example function call
-     *
-     * Used to help output HTML to markdown documentation pages
-     *
-     * @param string $filename
-     * @return string|null
-     */
-    public function getHtml(string $filename): ?string
-    {
-        if (isset($this->html[$filename])) {
-            return $this->html[$filename];
-        }
-        return null;
     }
 
 }

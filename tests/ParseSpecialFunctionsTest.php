@@ -4,14 +4,14 @@ namespace Tests;
 
 use PHPUnit\Framework\TestCase;
 use Studio24\DesignSystem\Exception\HtmlParserException;
-use Studio24\DesignSystem\Parser\HtmlParser;
+use Studio24\DesignSystem\Parser\TagParser;
 
 final class ParseSpecialFunctionsTest extends TestCase
 {
 
     public function testMatchAll()
     {
-        $parser = new HtmlParser();
+        $parser = new TagParser();
 
         $html = <<<EOD
 <p>Some text</p>
@@ -41,7 +41,7 @@ EOD;
 
     public function testInvalidHtmlTag()
     {
-        $parser = new HtmlParser();
+        $parser = new TagParser();
 
         $this->expectException(HtmlParserException::class);
         $matches = $parser->matchAll('<p>some text</p>', 'example');

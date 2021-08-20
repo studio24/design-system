@@ -1,3 +1,3 @@
 # Guidelines
 
-Examples
+Examples, view [colours](colours.md)

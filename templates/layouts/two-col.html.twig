@@ -35,7 +35,9 @@
 					<nav class="section-nav">
 						<ul class="clean-list" role="list">
 						{% for item in sibling_navigation %}
+							{% if not item.in_navigation %}
 							<li class="{% if current_url == item.url %}active{% endif %}"><a class="nav-link" href="{{ item.url }}">{{ item.title }}</a></li>
+							{% endif %}
 						{% endfor %}
 						</ul>
 					</nav>

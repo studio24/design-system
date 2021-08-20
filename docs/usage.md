@@ -2,8 +2,7 @@
 
 ## Writing documentation
 
-You need to [write your documentation](writing-documentation.md) in Markdown format. You can include
-code examples directly in your documentation via custom HTML tags. 
+You need to [write your documentation](writing-documentation.md) in Markdown format. 
 
 ## Build design system website
 
@@ -34,8 +33,7 @@ via the `--config` or `-c` option.
 You can also run only specific actions via the `--actions` or `-a` option. Available actions are:
 * `c` - Clean destination directory and copy design assets 
 * `a` - Build frontend assets
-* `p` - Build documentation pages and code examples
-* `t` - Build templates
+* `d` - Build documentation pages
 
 You can specify one or many actions by concatenating them together, e.g.
 
@@ -46,7 +44,7 @@ You can specify one or many actions by concatenating them together, e.g.
 or:
 
 ```
-./vendor/bin design-system -a=cpt
+./vendor/bin design-system -a=ad
 ```
 
 ## View the design system website

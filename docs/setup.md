@@ -44,10 +44,12 @@ _dist
 
 You can either use the default setup, or [customise the configuration file](configuration.md).
 
-It's recommended you update the following configuration properties to ensure the Design System builds properly:
+## Navigation
 
-* [navigation](configuration.md#navigation) - top-level navigation links
-* [build_templates](configuration.md#build_templates) - full page templates to render
+You can define top-level navigation via the [`navigation` configuration variable](configuration.md#configuration).
+
+Secondary navigation is automatically generated for documentation pages in the left-hand column. A natural sort
+order is used to sort the child pages.
 
 ## Assets build script
 
@@ -59,29 +61,7 @@ to the `_dist/assets/design-system/` folder, which is used for the design system
 
 ## Documentation
 
-You can [write documentation](writing-documentation.md) in Markdown format. You can create any number of sub-folders to 
-organise your docs. Please remember to include a `README.md` file within each folder which acts as the index file. 
-
-## Code examples
-
-You can include [code examples](writing-documentation.md#outputting-code-examples) directly in your documentation.
-
-## Build full-page templates
-
-You can include example full-page templates by defining files or folders to build these from in the 
-[`build_templates` configuration variable](configuration.md#build_templates). 
-
-Make sure you also remember to add a link to your templates in the navigation. You can link to the automatically 
-created template index page at `/code/templates/index.html` or include links in your own documentation page.
-
-## Navigation
-
-You can define top-level navigation via the [`navigation` configuration variable](configuration.md#configuration).
-
-Secondary navigation is automatically generated for documentation pages in the left-hand column. A natural sort
-order is used to sort the child pages.
-
-If you wish to build full-page templates links to all templates is automatically generated on the template index page.
+You can [write documentation](writing-documentation.md) in Markdown format. 
 
 ## Custom design system templates
 

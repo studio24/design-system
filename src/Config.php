@@ -15,6 +15,8 @@ class Config
     const DEFAULT_CONFIG_FILE = 'design-system-config.php';
     const DEFAULT_ASSETS_BUILD_SCRIPT = 'design-system-build.sh';
     const DIST_PATH = '_dist';
+    const CODE_PATH = self::DIST_PATH . '/code';
+    const ASSETS_PATH = self::DIST_PATH . '/assets';
 
     private string $rootPath;
     private Filesystem $filesystem;
@@ -24,15 +26,13 @@ class Config
      * @var array
      */
     private array $config = [
-        'assets_build_command' => './' . self::DEFAULT_ASSETS_BUILD_SCRIPT,
-        'docs_path'         => 'docs/',
-        'templates_path'    => 'templates/',
-        'build_templates'   => [
-        ],
         'navigation'        => [
             'Home'          => '/',
             'Templates'     => '/code/templates/',
         ],
+        'assets_build_command' => './' . self::DEFAULT_ASSETS_BUILD_SCRIPT,
+        'docs_path'         => 'docs/',
+        'templates_path'    => 'templates/',
     ];
 
     /**
@@ -58,10 +58,10 @@ class Config
     /**
      * Return array of primary navigation
      *
-     * @param string $currentUrl
+     * @param ?string $currentUrl
      * @return array
      */
-    public function getNavigation(string $currentUrl): array
+    public function getNavigation(string $currentUrl = null): array
     {
         $navigation = [];
         foreach ($this->get('navigation') as $label => $url) {
@@ -82,6 +82,18 @@ class Config
             ];
         }
         return $navigation;
+    }
+
+    /**
+     * Does the URL appear in the top navigation?
+     * @param string $url
+     * @return bool
+     * @throws ConfigException
+     */
+    public function inNavigation(string $url): bool
+    {
+        $url = preg_replace('/index\.html$/', '', $url);
+        return in_array($url, $this->get('navigation'));
     }
 
     /**

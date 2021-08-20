@@ -10,31 +10,24 @@ use League\Flysystem\Local\LocalFilesystemAdapter;
 use League\Flysystem\UnableToWriteFile;
 use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use League\Flysystem\Visibility;
-use Masterminds\HTML5;
-use Parsedown;
-use Spatie\YamlFrontMatter\YamlFrontMatter;
 use Studio24\DesignSystem\Exception\BuildException;
 use Studio24\DesignSystem\Exception\ConfigException;
 use Studio24\DesignSystem\Exception\AssetsException;
-use Studio24\DesignSystem\Parser\ExampleHtmlParser;
+use Studio24\DesignSystem\Parser\ColorsParser;
 use Studio24\DesignSystem\Parser\ExampleParser;
-use Studio24\DesignSystem\Parser\HtmlParser;
+use Studio24\DesignSystem\Parser\ParsedownExtension;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Twig\Loader\FilesystemLoader;
 use Twig\Environment;
 
 class Build
 {
-    const DIR_CODE_EXAMPLES = Config::DIST_PATH . '/code/examples';
-    const DIR_CODE_TEMPLATES = Config::DIST_PATH . '/code/templates';
-
     private Config $config;
     private SymfonyStyle $output;
     private Filesystem $filesystem;
-    private Parsedown $markdown;
+    private ParsedownExtension $markdown;
     private ?Environment $twig = null;
     private ExampleParser $example;
-    private ExampleHtmlParser $exampleHtml;
 
     /**
      * Constructor
@@ -60,21 +53,13 @@ class Build
             ],
         ],
         Visibility::PUBLIC);
-
         $adapter = new LocalFilesystemAdapter($config->getRootPath(), $visibility);
         $this->filesystem = new Filesystem($adapter);
-        $this->markdown = new Parsedown();
+        $this->markdown = new ParsedownExtension();
 
-        // Setup markdown special functions to output code examples
-        $this->example = new ExampleParser();
-        $this->example->setTwig($this->getTwig());
-        $this->example->setConfig($this->config);
-        $this->example->setOutput($output);
-        $this->example->setFilesystem($this->filesystem);
-
-        $this->exampleHtml = new ExampleHtmlParser();
-        $this->exampleHtml->setExampleFunction($this->example);
-        $this->exampleHtml->setTwig($this->getTwig());
+        // Setup tags to output code examples from docs
+        $this->example = new ExampleParser($this->getTwig(), $this->config, $output, $this->filesystem);
+        $this->colors = new ColorsParser($this->getTwig(), $this->config, $this->filesystem);
     }
 
     /**
@@ -97,7 +82,7 @@ class Build
             $this->config->getFullPath('templates_path'),
         ]);
 
-        // Use local project template path for Design System temlates, if exists
+        // Use local project template path for Design System templates, if exists
         $paths = [];
         $templatePath = $this->config->buildPath($this->config->getFullPath('templates_path'), '/design-system/');
         if (is_dir($templatePath)) {
@@ -109,8 +94,8 @@ class Build
         $loader->setPaths($paths, 'DesignSystem');
 
         $options = ['debug' => true];
-        $this->templatesTwig = new Environment($loader, $options);
-        return $this->templatesTwig;
+        $this->twig = new Environment($loader, $options);
+        return $this->twig;
     }
 
     /**
@@ -123,18 +108,16 @@ class Build
         $destination = Config::DIST_PATH;
         try {
             $this->filesystem->deleteDirectory($destination);
+            $this->filesystem->createDirectory($destination);
+
         } catch (FilesystemException | UnableToDeleteDirectory $exception) {
             throw new BuildException(sprintf('Cannot clean destination folder, error: %s', $exception->getMessage()));
-        }
-        try {
-            $this->filesystem->createDirectory($destination);
-        } catch (FilesystemException | UnableToCreateDirectory $exception) {
-            throw new BuildException(sprintf('Cannot create destination folder, error: %s', $exception->getMessage()));
         }
     }
 
     /**
-     * Build frontend assets
+     * Build frontend assets via shell command
+     *
      * @param bool $passthru Whether to output result of command as it runs or not
      * @throws AssetsException
      */
@@ -166,6 +149,7 @@ class Build
 
     /**
      * Copy design system website assets
+     *
      * Copes files from /assets to ./_dist/assets/design-system of project
      * @throws BuildException
      */
@@ -182,7 +166,7 @@ class Build
             foreach ($listing as $item) {
                 $path = $item->path();
                 if ($item instanceof FileAttributes) {
-                    $destination = $this->config->buildPath(Config::DIST_PATH . '/assets', $path);
+                    $destination = $this->config->buildPath(Config::ASSETS_PATH, $path);
                     $this->filesystem->write($destination, $assetsFilesystem->read($path));
 
                     if ($this->output->isVerbose()) {
@@ -199,12 +183,12 @@ class Build
      * Build markdown files as HTML
      * @throws BuildException
      */
-    public function buildPages()
+    public function buildDocs()
     {
         $docsPath = $this->config->get('docs_path');
-        $this->output->text(sprintf('Parsing folder for markdown pages: %s', $docsPath));
+        $this->output->text(sprintf('Parsing documentation at %s', $docsPath));
 
-        // Build list of pages
+        // Build list of doc layouts
         $pages = [];
         try {
             $listing = $this->filesystem->listContents($docsPath, Filesystem::LIST_DEEP);
@@ -238,14 +222,15 @@ class Build
                         $title = $filename;
                     }
 
-                    // Build hierarchy of pages
-                    $location = trim($dir, '/');
-                    if (!isset($pages[$location])) {
-                        $pages[$location] = [];
+                    // Build hierarchy of layouts
+                    $subDirectory = trim($dir, '/');
+                    if (!isset($pages[$subDirectory])) {
+                        $pages[$subDirectory] = [];
                     }
 
-                    $pages[$location][] = [
-                        'location'      => $location,
+                    $pages[$subDirectory][] = [
+                        'location'      => $subDirectory,
+                        'filename'      => $filename,
                         'title'         => $title,
                         'source'        => $path,
                         'destination'   => $destination,
@@ -257,48 +242,64 @@ class Build
             throw new BuildException(sprintf('Cannot build markdown page from source %s to _dist, error: %s', $docsPath, $exception->getMessage()));
         }
 
-        // Sort child pages
-        foreach ($pages as $location => &$children) {
-            uasort($children, function($a, $b){
+        // Sort layouts in each sub-directory
+        foreach ($pages as $subDirectory => $children) {
+            uasort($pages[$subDirectory], function($a, $b) {
+                // Stick index layouts to top
+                if ($a['filename'] === 'index') {
+                    return -1;
+                } elseif ($b['filename'] === 'index') {
+                    return 1;
+                }
+                // Or sort using natural sort order
                 return strnatcmp($a['title'], $b['title']);
             });
         }
 
+        // Work out if any sub-directories do not include index layouts
+        $noIndexPages = array_keys($pages);
+        foreach ($pages as $subDirectory => $children) {
+            foreach ($children as $item) {
+                if ($item['filename'] === 'index') {
+                    $key = array_search($subDirectory, $noIndexPages);
+                    if ($key !== false) {
+                        unset($noIndexPages[$key]);
+                    }
+                }
+            }
+        }
+
         // Build sibling nav
+        $navigation = $this->config->get('navigation');
         $siblingNavigation = [];
-        foreach ($pages as $location => $children) {
-            $siblingNavigation[$location] = [];
+        foreach ($pages as $subDirectory => $children) {
+            $siblingNavigation[$subDirectory] = [];
             foreach ($children as $page) {
-                $siblingNavigation[$location][] = [
+                $siblingNavigation[$subDirectory][] = [
                     'title' => $page['title'],
                     'url'   => $page['link'],
+                    'in_navigation' => $this->config->inNavigation($page['link']),
                 ];
             }
         }
 
-        // Build pages
-        foreach ($pages as $location => $children) {
-
-            // Do we need an index page?
-
-            // Is there more than one page in this location? (one-col, two-col template)
-
-            // Index page (don't generate for root)
-            if ($location !== "") {
-                $this->buildIndexPage($location, $siblingNavigation[$location]);
-            }
-
-            // Page
+        // Build layouts
+        foreach ($pages as $subDirectory => $children) {
             foreach ($children as $page) {
-                $this->buildDocsPage($page['source'], $page['destination'], $siblingNavigation[$location]);
+                $this->buildDocsPage($page['source'], $page['destination'], $siblingNavigation[$subDirectory]);
             }
+        }
+
+        // Do we need to build any index layouts?
+        foreach ($noIndexPages as $subDirectory) {
+            $this->buildIndexPage($subDirectory, $siblingNavigation[$subDirectory]);
         }
     }
 
     /**
      * Render index page and save
      * @param string $directory Directory to save index page to
-     * @param array $siblingNavigation Links to sibling pages
+     * @param array $siblingNavigation Links to sibling layouts
      */
     public function buildIndexPage(string $directory, array $siblingNavigation)
     {
@@ -306,6 +307,7 @@ class Build
         $destination = Config::DIST_PATH . DIRECTORY_SEPARATOR . $directory . '/index.html';
 
         $data = [
+            'title' => ucfirst($directory),
             'sibling_navigation' => $siblingNavigation,
             'navigation' => $this->config->getNavigation($this->config->getDistUrl($destination)),
         ];
@@ -321,7 +323,7 @@ class Build
      * Render markdown page and save
      * @param string $sourcePath Source file to read markdown from
      * @param string $destination Destination to save HTML page to
-     * @param array $siblingNavigation Links to sibling pages
+     * @param array $siblingNavigation Links to sibling layouts
      * @throws BuildException
      * @throws \Twig\Error\LoaderError
      * @throws \Twig\Error\RuntimeError
@@ -337,15 +339,16 @@ class Build
             throw new BuildException(sprintf('Cannot load markdown docs file at %s', $sourcePath));
         }
 
-        $html =  $this->markdown->text($markdown);
-
-        // Parse example fragment: <example title="Button" src="components/button.html.twig" data="buttonText: A button">
+        // Parse <example> tag
         $this->example->setCurrentFile($sourcePath);
-        $html = $this->example->parse($html);
+        $markdown = $this->example->parse($markdown);
 
-        // Parse example code fragment: <exampleHtml src="components/button.html.twig">
-        $this->exampleHtml->setCurrentFile($sourcePath);
-        $html = $this->exampleHtml->parse($html);
+        // Parse <colors> tag
+        $this->colors->setCurrentFile($sourcePath);
+        $markdown = $this->colors->parse($markdown);
+
+        // Parse markdown
+        $html =  $this->markdown->text($markdown);
 
         // Build Twig data
         $data = [
@@ -355,194 +358,17 @@ class Build
         $data['current_url'] = $this->config->getDistUrl($destination);
         $data['navigation'] = $this->config->getNavigation($data['current_url']);
 
-        if ($sourcePath === 'docs/README.md' || empty($siblingNavigation)) {
-            $template = '@DesignSystem/content-main.html.twig';
-        } else {
+        // Use one-col if one page, or two-col if more than one page (in sub-directory)
+        if (count($siblingNavigation) > 1) {
             $template = '@DesignSystem/content-page.html.twig';
+        } else {
+            $template = '@DesignSystem/content-page-no-siblings.html.twig';
         }
         $html = $twig->render($template, $data);
 
-        $config = [
-            'visibility' => Visibility::PUBLIC,
-        ];
         $this->filesystem->write($destination, $html);
         if ($this->output->isVerbose()) {
             $this->output->text('* ' . $destination);
-        }
-    }
-
-    /**
-     * Build full page templates and link to design system site
-     *
-     * @throws BuildException
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws \Twig\Error\LoaderError
-     * @throws \Twig\Error\RuntimeError
-     * @throws \Twig\Error\SyntaxError
-     */
-    public function buildTemplates()
-    {
-        $templates = $this->config->get('build_templates');
-        if (!is_array($templates)) {
-            return;
-        }
-
-        // Render templates found in config variable 'build_templates'
-        $savedTemplates = [];
-        foreach ($templates as $name => $path) {
-            $rootPath = $this->config->buildPath($this->config->get('templates_path'), $path);
-
-            // Single file
-            if ($this->filesystem->fileExists($rootPath)) {
-                if ($this->isTwigFile($path)) {
-                    $data = $this->loadTemplateData($path);
-                    $destination = $this->renderTemplateToDest($path, Build::DIR_CODE_TEMPLATES, $data);
-                    $savedTemplates[] = $destination;
-                }
-                continue;
-            }
-
-            // Directory
-            try {
-                $listing = $this->filesystem->listContents($rootPath, true);
-
-                /** @var \League\Flysystem\StorageAttributes $item */
-                foreach ($listing as $item) {
-                    if ($item instanceof \League\Flysystem\FileAttributes && $this->isTwigFile($item->path())) {
-                        $data = $this->loadTemplateData($item->path());
-                        $twigPath = preg_replace('!^' . preg_quote($this->config->get('templates_path')) . '!', '', $item->path());
-                        $destination = $this->renderTemplateToDest($twigPath, Build::DIR_CODE_TEMPLATES, $data);
-                        $savedTemplates[] = $destination;
-                    }
-                }
-            } catch (FilesystemException $exception) {
-                throw new BuildException(sprintf('Cannot build templates from directory %s, error: %s', $path, $exception->getMessage()));
-            }
-        }
-
-        // Build index page
-        $templateLinks = [];
-        $groupTemplatesLinks = [];
-        foreach ($savedTemplates as $destination) {
-            $destination = preg_replace('!^' . preg_quote(Build::DIR_CODE_TEMPLATES) . '!', '', $destination);
-            $destination = ltrim($destination, '/');
-            $directory = dirname($destination);
-            $label = basename($destination);
-            $url = $this->config->getDistUrl($destination);
-
-            // Top-level templates
-            if ($directory === '.') {
-                $templateLinks[] = [
-                    'title' => $label,
-                    'url' => $url,
-                ];
-                continue;
-            }
-
-            // Templates grouped buy sub-directory
-            if (!isset($groupTemplatesLinks[$directory])) {
-                $groupTemplatesLinks[$directory] = [];
-            }
-            $groupTemplatesLinks[$directory][] = [
-                'title' => $label,
-                'url' => $url,
-            ];
-        }
-
-        // Sort templates
-        uasort($templateLinks, function($a, $b){
-            return strnatcmp($a['title'], $b['title']);
-        });
-        foreach ($groupTemplatesLinks as $directory => &$children) {
-            uasort($children, function($a, $b){
-                return strnatcmp($a['title'], $b['title']);
-            });
-        }
-
-        // Render template index page
-        $destination = $this->config->buildPath(Build::DIR_CODE_TEMPLATES, 'index.html');
-        $currentUrl = $this->config->getDistUrl($destination);
-        $data = [
-            'templates' => $templateLinks,
-            'group_templates' => $groupTemplatesLinks,
-            'current_url' => $currentUrl,
-            'navigation' => $this->config->getNavigation($currentUrl),
-        ];
-        $html = $this->getTwig()->render('@DesignSystem/content-templates.html.twig', $data);
-        try {
-            $this->filesystem->write($destination, $html);
-            if ($this->output->isVerbose()) {
-                $this->output->text('* ' . $destination);
-            }
-
-        } catch (FilesystemException | UnableToWriteFile $exception) {
-            throw new BuildException(sprintf('Cannot render template index to destination %s, error: %s', $destination, $exception->getMessage()));
-        }
-    }
-
-    /**
-     * Whether the file is a Twig template (has a .twig file extension)
-     * @param string $path
-     * @return bool
-     */
-    public function isTwigFile(string $path): bool
-    {
-        return (pathinfo($path, PATHINFO_EXTENSION) === 'twig');
-    }
-
-    /**
-     * Load template data array to pass to Twig, if exists
-     *
-     * @param string $templatePath
-     * @return array
-     * @throws FilesystemException
-     */
-    public function loadTemplateData(string $templatePath): array
-    {
-        $dataPath = $templatePath . '.php';
-        if ($this->filesystem->fileExists($dataPath)) {
-            require $dataPath;
-            if (isset($data) && is_array($data)) {
-                return $data;
-            }
-        }
-        return [];
-    }
-
-    /**
-     * Render a template and output to destination folder
-     * @param string $templatePath Config to template file, relative to template root
-     * @param string $destFolder Folder to save outputted file to, relative to project root
-     * @return string Destination path template saved to
-     * @throws BuildException
-     * @throws \Twig\Error\LoaderError
-     * @throws \Twig\Error\RuntimeError
-     * @throws \Twig\Error\SyntaxError
-     */
-    public function renderTemplateToDest(string $templatePath, string $destFolder, array $data = []): string
-    {
-        $twig = $this->getTwig();
-
-        // Calculate destination path
-        $directory = dirname($templatePath);
-        $filename = $this->config->getHtmlFilename($templatePath);
-        if ($directory !== '.') {
-            $destination = $this->config->buildPath($destFolder, $directory . DIRECTORY_SEPARATOR . $filename);
-        } else {
-            $destination = $this->config->buildPath($destFolder, $filename);
-        }
-
-        $html = $twig->render($templatePath, $data);
-        try {
-            $this->filesystem->write($destination, $html);
-            if ($this->output->isVerbose()) {
-                $this->output->text('* ' . $destination);
-            }
-            return $destination;
-
-        } catch (FilesystemException | UnableToWriteFile $exception) {
-            throw new BuildException(sprintf('Cannot render template file %s to destination %s, error: %s', $templatePath, $destination, $exception->getMessage()));
         }
     }
 

@@ -21,10 +21,6 @@ $config = [
         'Home'          => '/',
         'Templates'     => '/code/templates/',
     ],
-    'build_templates'   => [
-    ],
-    'debug'             => false,
-    'cache_path'        => null,
     'assets_build_command' => './design-system-build.sh',
     'docs_path'         => 'docs/',
     'templates_path'    => 'templates/',

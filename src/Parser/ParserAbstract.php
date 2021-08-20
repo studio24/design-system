@@ -11,7 +11,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Twig\Environment;
 
 /**
- * Base functionality for HTML tag parsing in documentation pages
+ * Base functionality for HTML tag parsing in documentation layouts
  */
 abstract class ParserAbstract
 {
@@ -20,11 +20,11 @@ abstract class ParserAbstract
     protected Environment $twig;
     protected SymfonyStyle $output;
     protected string $currentFile;
-    protected HtmlParser $htmlParser;
+    protected TagParser $htmlParser;
 
     public function __construct()
     {
-        $this->htmlParser = new HtmlParser();
+        $this->htmlParser = new TagParser();
     }
 
     /**

@@ -6,9 +6,9 @@ use Masterminds\HTML5;
 use Studio24\DesignSystem\Exception\HtmlParserException;
 
 /**
- * Helper functions to parse special functions in the form {{ function() }} out of a string
+ * Helper functions to parse tags and return HTML
  */
-class HtmlParser
+class TagParser
 {
 
     /**

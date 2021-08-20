@@ -1,15 +1,14 @@
 # Design system
 
-Simple tool to build a static design system website using [Twig](https://twig.symfony.com/) for page templating.
-This allows you to create templates in Twig and document these next to your templates. You can then use the templates in 
-your web project and output static design system documentation. We use this system for the W3C Design System, in their 
-[template bundle repo](https://github.com/w3c/w3c-website-templates-bundle).
+Simple documentation-first tool to build a static design system website based on Markdown documentation files and [Twig](https://twig.symfony.com/) templates.
 
 Key features:
 
-* Builds design system based on Markdown documentation and Twig templates
-* Use sample data to help build Twig templates
-* Runs any local asset build process to build frontend assets
+* Documentation-first approach, builds design system website based on Markdown docs
+* Include code examples and templates via special tags
+* Include sample data for code examples and templates
+* Generate colour swatches in documentation
+* Extensible via custom tags
 
 ## Requirements
 
@@ -24,7 +23,8 @@ Load the library for local development only:
 composer require --dev studio24/design-system
 ```
 
-If you already have this in your project then just run `composer install` to download the files.
+If you already have this in your project then just run `composer install` to download the files. To update your copy of
+the the design system library files run `composer update`
 
 To build the design system website files:
 
@@ -46,7 +46,7 @@ php -S localhost:8000 -t _dist
 
 ## Documentation
 
-See [docs](docs/README.md) for full details on how to use this tool.
+See [docs](docs/README.md) for further details.
 
 ## License
 

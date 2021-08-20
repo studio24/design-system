@@ -2,12 +2,11 @@
 
 Where and how to use buttons and their function.
 
-Here is an example
+<example title="Button" src="components/button.html.twig" data="buttonText: A button"/>
 
-<example title="Button" src="components/button.html.twig" data="buttonText: A button">
+## Some more text
 
-Here is the code of the example.
+Some more text here
 
-```html
-<exampleHtml src="components/button.html.twig">
-```
+* And here
+* Here

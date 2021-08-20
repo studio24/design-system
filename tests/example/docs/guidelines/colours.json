@@ -1,0 +1,32 @@
+[
+  {
+    "title": "Surfaces",
+    "colors": [
+      {
+        "color": "#ffffff",
+        "variable": "$white"
+      },
+      {
+        "color": "#f8f8fb",
+        "variable": "$mist-gray"
+      }
+    ]
+  },
+  {
+    "title": "Core colors",
+    "colors": [
+      {
+        "color": "#005a9c",
+        "variable": "$w3c-blue",
+        "alt-variable": "$link-color",
+        "notes": "Link default state"
+      },
+      {
+        "color": "#024488",
+        "variable": "$deep-blue",
+        "alt-variable": "$link-color--hover",
+        "notes": "Link hover state"
+      }
+    ]
+  }
+]

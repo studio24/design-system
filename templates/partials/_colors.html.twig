@@ -1,0 +1,44 @@
+
+<table class="swatches" aria-labelledby="color-table">
+    <caption id="color-table">Table of colors and notes on their usage</caption>
+    <tbody>
+
+    {% for group in colors %}
+
+    <tr>
+        <td colspan="4"><h3>{{ group.title }}</h3></td>
+    </tr>
+
+    {% for color in group.colors %}
+
+    <tr>
+        <th scope="row">
+<span class="color-swatch"
+      style="background-color:{{ color.color }}">
+</span>
+            <code>
+                {{ color.variable }}
+            </code>
+        </th>
+        <td>
+            <code>
+                {% if color.alt-variable %}
+                {{ color.alt-variable }}
+                {% endif %}
+            </code>
+        </td>
+        <td>
+            {{ color.color }}
+        </td>
+        <td>
+            {% if color.notes %}
+            {{ color.notes }}
+            {% endif %}
+        </td>
+    </tr>
+
+    {% endfor %}
+    {% endfor %}
+
+    </tbody>
+</table>

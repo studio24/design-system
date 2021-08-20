@@ -16,7 +16,7 @@ class BuildTest extends TestCase
         $application->setAutoExit(false);
         $tester = new ApplicationTester($application);
 
-        $status = $tester->run(['dist', 'pages'], ['verbosity' => true]);
+        $status = $tester->run(['dist', 'layouts'], ['verbosity' => true]);
         $this->assertSame(0, $status);
     }
 
