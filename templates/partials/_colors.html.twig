@@ -1,6 +1,6 @@
 
 <table class="swatches" aria-labelledby="color-table">
-    <caption id="color-table">Table of colors and notes on their usage</caption>
+    <caption id="color-table">{{ caption | default('Table of colors and notes on their usage') }}</caption>
     <tbody>
 
     {% for group in colors %}

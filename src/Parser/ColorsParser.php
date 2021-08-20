@@ -67,7 +67,11 @@ class ColorsParser extends ParserAbstract
         }
 
         // Render colours template and return to docs page
-        return $this->twig->render('@DesignSystem/partials/_colors.html.twig', ['colors' => $data]);
+        $data = ['colors' => $data];
+        if (isset($params['caption'])) {
+            $data['caption'] = $params['caption'];
+        }
+        return $this->twig->render('@DesignSystem/partials/_colors.html.twig', $data);
     }
 
     /**

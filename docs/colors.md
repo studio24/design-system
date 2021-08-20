@@ -15,6 +15,9 @@ To output your color swatch use:
 This tag requires one attribute:
 * `src` - path to JSON data file for color swatch, relative to your docs folder
 
+You can optionally set:
+* `caption` - the table caption displayed at the top of the color swatches (default is "Table of colors and notes on their usage")
+
 ## Data structure
 
 You need to define your color swatches in a JSON array. Each array element must contain:
