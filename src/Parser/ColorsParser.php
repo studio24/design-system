@@ -7,7 +7,7 @@ use League\Flysystem\Filesystem;
 use Studio24\DesignSystem\Build;
 use Studio24\DesignSystem\Config;
 use Studio24\DesignSystem\Exception\BuildException;
-use Studio24\DesignSystem\Exception\ColourDataException;
+use Studio24\DesignSystem\Exception\ColorsTagException;
 use Studio24\DesignSystem\Exception\DataArrayMissingException;
 use Studio24\DesignSystem\Exception\InvalidFileException;
 use Studio24\DesignSystem\Exception\MissingAttributeException;
@@ -47,12 +47,19 @@ class ColorsParser extends ParserAbstract
     {
         // Get params
         if (!isset($params['src'])) {
-            throw new MissingAttributeException('You must set the src attribute for the <colors> tag in doc file %s', $this->currentFile);
+            throw new MissingAttributeException(sprintf('Missing attribute src. Error with tag %s in doc file %s', $this->currentHtmlMatch, $this->currentFile));
         }
 
         // Load data
-        $json = $this->filesystem->read($this->config->get('docs_path') . '/' . $params['src']);
-        $data = json_decode($json, true, 512,JSON_THROW_ON_ERROR);
+        try {
+            $path = $this->config->get('docs_path') . '/' . $params['src'];
+            $json = $this->filesystem->read($path);
+            $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        } catch (FilesystemException | UnableToReadFile $exception) {
+            throw new ColorsTagException(sprintf('Cannot read data file at %s. Error with tag %s in doc file %s', $path, $this->currentHtmlMatch, $this->currentFile));
+        } catch (\JsonException $exception) {
+            throw new ColorsTagException(sprintf('Invalid JSON data (error %s). Error with tag %s in doc file %s', $exception->getMessage(), $this->currentHtmlMatch, $this->currentFile));
+        }
 
         // Validate data
         $colours = [];
@@ -78,12 +85,12 @@ class ColorsParser extends ParserAbstract
      * Check a key exists
      * @param array $data
      * @param string $key
-     * @throws ColourDataException
+     * @throws ColorsTagException
      */
     public function keyExists(array $data, string $key)
     {
         if (!isset($data[$key])) {
-            throw new ColourDataException(sprintf('Colour data array invalid, missing key %s for data element %s', $key, print_r($data)));
+            throw new ColorsTagException(sprintf('Colour data array invalid, missing key %s. Error with tag %s in doc file %', $key, $this->currentHtmlMatch, $this->currentFile));
         }
     }
 
@@ -91,12 +98,12 @@ class ColorsParser extends ParserAbstract
      * Check key is an array
      * @param array $data
      * @param ?string $key
-     * @throws ColourDataException
+     * @throws ColorsTagException
      */
     public function isArray(array $data, string $key = null)
     {
         if (!is_array($data[$key])) {
-            throw new ColourDataException(sprintf('Colour data array invalid, key %s is not an array for data element %s', $key, print_r($data)));
+            throw new ColorsTagException(sprintf('Color data array invalid, key %s is not an array. Error with tag %s in doc file %', $key, $this->currentHtmlMatch, $this->currentFile));
         }
     }
 

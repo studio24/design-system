@@ -8,6 +8,7 @@ use Studio24\DesignSystem\Build;
 use Studio24\DesignSystem\Config;
 use Studio24\DesignSystem\Exception\BuildException;
 use Studio24\DesignSystem\Exception\DataArrayMissingException;
+use Studio24\DesignSystem\Exception\ExampleTagException;
 use Studio24\DesignSystem\Exception\InvalidFileException;
 use Studio24\DesignSystem\Exception\MissingAttributeException;
 use Studio24\DesignSystem\Exception\PathDoesNotExistException;
@@ -47,10 +48,10 @@ class ExampleParser extends ParserAbstract
     {
         // Get params
         if (!isset($params['title'])) {
-            throw new MissingAttributeException('You must set the title src for the <example> tag. Error with tag %s in doc file %s', $this->currentHtmlMatch, $this->currentFile);
+            throw new MissingAttributeException(sprintf('Missing title attribute. Error with tag %s in doc file %s', $this->currentHtmlMatch, $this->currentFile));
         }
         if (!isset($params['src'])) {
-            throw new MissingAttributeException('You must set the attribute src for the <example> tag. Error with tag %s in doc file %s', $this->currentHtmlMatch, $this->currentFile);
+            throw new MissingAttributeException(sprintf('Missing src attribute. Error with tag %s in doc file %s', $this->currentHtmlMatch, $this->currentFile));
         }
         $title = $params['title'];
         $filename = $params['src'];
@@ -63,21 +64,25 @@ class ExampleParser extends ParserAbstract
         if (isset($params['data-src'])) {
             $path = $this->config->getFullPath('templates_path') . DIRECTORY_SEPARATOR . $params['data-src'];
             if (!file_exists($path)) {
-                throw new PathDoesNotExistException(sprintf('Cannot load data file from %s', $params['data-src']));
+                throw new ExampleTagException(sprintf('Cannot load data file from %s. Error with tag %s in doc file %s', $params['data-src'], $this->currentHtmlMatch, $this->currentFile));
             }
             $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
             switch ($extension) {
                 case 'json':
-                    $data = json_decode(file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
+                    try {
+                        $data = json_decode(file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
+                    } catch (\JsonException $exception) {
+                        throw new ExampleTagException(sprintf('Invalid JSON data (error %s). Error with tag %s in doc file %s', $exception->getMessage(), $this->currentHtmlMatch, $this->currentFile));
+                    }
                     break;
                 case 'php':
                     require $path;
                     if (!isset($data) || !is_array($data)) {
-                        throw new DataArrayMissingException(sprintf('Cannot load $data array from PHP file %s', $params['data-src']));
+                        throw new ExampleTagException(sprintf('Cannot load $data array from PHP file %s. Error with tag %s in doc file %s', $params['data-src'], $this->currentHtmlMatch, $this->currentFile));
                     }
                     break;
                 default:
-                    throw new InvalidFileException(sprintf('Data file extension %s not recognised for file %s', $extension, $params['data-src']));
+                    throw new ExampleTagException(sprintf('Data file extension %s not recognised for file %s. Error with tag %s in doc file %s', $extension, $params['data-src'], $this->currentHtmlMatch, $this->currentFile));
             }
         }
         if (!isset($data)) {
@@ -111,7 +116,7 @@ class ExampleParser extends ParserAbstract
             }
 
         } catch (FilesystemException | UnableToWriteFile $exception) {
-            throw new BuildException(sprintf('Cannot save example template to %s, error: %s', $filename, $exception->getMessage()));
+            throw new ExampleTagException(sprintf('Cannot save example template to %s (%s). Error with tag %s in doc file %s', $filename, $exception->getMessage(), $this->currentHtmlMatch, $this->currentFile));
         }
 
         // Return example HTML to docs page
