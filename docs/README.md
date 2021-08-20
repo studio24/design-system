@@ -1,6 +1,6 @@
 # Design system
 
-Simple documentation-first tool to build a static design system website based on Markdown documentation files and [Twig](https://twig.symfony.com/) templates.
+Simple documentation-first tool to build a static design system website based on Markdown documentation files and Twig templates
 
 Useful pages:
 

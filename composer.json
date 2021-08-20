@@ -1,6 +1,6 @@
 {
     "name": "studio24/design-system",
-    "description": "PHP based build system for a static Design System, based on Twig",
+    "description": "Simple documentation-first tool to build a static design system website based on Markdown documentation files and Twig templates",
     "type": "library",
     "license": "MIT",
     "require": {

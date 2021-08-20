@@ -1,18 +1,20 @@
 # Design system
 
-Simple documentation-first tool to build a static design system website based on Markdown documentation files and [Twig](https://twig.symfony.com/) templates.
+Simple documentation-first tool to build a static design system website based on Markdown documentation files and Twig templates.
 
 Key features:
 
-* Documentation-first approach, builds design system website based on Markdown docs
-* Include code examples and templates via special tags
+* Documentation-first approach, builds design system website based on Markdown docs and [Twig](https://twig.symfony.com/) templates
+* Manually control primary navigation
+* Automatically generates sibling navigation
+* Include code examples and full-page example templates via custom tags (displays embedded code and HTML source code)
 * Include sample data for code examples and templates
 * Generate colour swatches in documentation
 * Extensible via custom tags
 
 ## Requirements
 
-* PHP 7.3+
+* PHP 7.4+
 * [Composer](https://getcomposer.org/)
 
 ## Installation
@@ -54,6 +56,6 @@ See [docs](docs/README.md) for further details.
 
 ## Credits
 
-Developed by [Simon R Jones](https://github.com/simonrjones/).
+Developed by [Simon R Jones](https://github.com/simonrjones/), HTML/CSS design system layout by Nicola Saunders.
 
 Inspired by [GOVUK Design System](https://design-system.service.gov.uk/) and [Drizzle](https://github.com/cloudfour/drizzle).
