@@ -47,7 +47,7 @@ class ColorsParser extends ParserAbstract
     {
         // Get params
         if (!isset($params['src'])) {
-            throw new MissingAttributeException('You must set the src attribute, e.g. <colors src="filename.json" />');
+            throw new MissingAttributeException('You must set the src attribute for the <colors> tag in doc file %s', $this->currentFile);
         }
 
         // Load data

@@ -47,10 +47,10 @@ class ExampleParser extends ParserAbstract
     {
         // Get params
         if (!isset($params['title'])) {
-            throw new MissingAttributeException('You must set the title src, e.g. <example title="My component" src="filename.html">');
+            throw new MissingAttributeException('You must set the title src for the <example> tag. Error with tag %s in doc file %s', $this->currentHtmlMatch, $this->currentFile);
         }
         if (!isset($params['src'])) {
-            throw new MissingAttributeException('You must set the attribute src, e.g. <example title="My component" src="filename.html">');
+            throw new MissingAttributeException('You must set the attribute src for the <example> tag. Error with tag %s in doc file %s', $this->currentHtmlMatch, $this->currentFile);
         }
         $title = $params['title'];
         $filename = $params['src'];

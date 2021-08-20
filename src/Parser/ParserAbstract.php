@@ -20,6 +20,7 @@ abstract class ParserAbstract
     protected Environment $twig;
     protected SymfonyStyle $output;
     protected string $currentFile;
+    protected string $currentHtmlMatch;
     protected TagParser $htmlParser;
 
     public function __construct()
@@ -90,8 +91,9 @@ abstract class ParserAbstract
     {
         foreach ($this->htmlParser->matchAll($html, $this->getHtmlTag()) as $match) {
             $attributes = $this->htmlParser->extractAttributes($match);
-            $rendered = $this->render($attributes);
+            $this->currentHtmlMatch = $match;
 
+            $rendered = $this->render($attributes);
             $html = $this->htmlParser->replace($match, $rendered, $html);
         }
         return $html;
