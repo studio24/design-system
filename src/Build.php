@@ -307,6 +307,7 @@ class Build
         $destination = Config::DIST_PATH . DIRECTORY_SEPARATOR . $directory . '/index.html';
 
         $data = [
+            'date'  => new \DateTime(),
             'title' => ucfirst($directory),
             'sibling_navigation' => $siblingNavigation,
             'navigation' => $this->config->getNavigation($this->config->getDistUrl($destination)),
@@ -352,6 +353,7 @@ class Build
 
         // Build Twig data
         $data = [
+            'date'               => new \DateTime(),
             'contents'           => $html,
             'sibling_navigation' => $siblingNavigation,
         ];

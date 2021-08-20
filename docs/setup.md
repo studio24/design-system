@@ -74,3 +74,10 @@ Some notable templates worth customising are:
 * `example-code.html.twig` - Template used to [output code examples](writing-documentation.md#custom-template-for-code-examples)
 
 You can find the original templates in `vendor/studio24/design-system/templates/`
+
+For the footer template you can use the `{{ date }}` to output the generation datetime. You can use the [Twig date filter](https://twig.symfony.com/doc/3.x/filters/date.html) 
+to format your datetime. E.g.
+
+```twig
+{{ date|date("d M Y, H:i:s e")  }}
+```
