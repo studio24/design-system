@@ -15,7 +15,7 @@ use Studio24\DesignSystem\Exception\ConfigException;
 use Studio24\DesignSystem\Exception\AssetsException;
 use Studio24\DesignSystem\Parser\ColorsParser;
 use Studio24\DesignSystem\Parser\ExampleParser;
-use Studio24\DesignSystem\Parser\ParsedownExtension;
+use Studio24\DesignSystem\Parser\Markdown;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Twig\Loader\FilesystemLoader;
 use Twig\Environment;
@@ -25,7 +25,7 @@ class Build
     private Config $config;
     private SymfonyStyle $output;
     private Filesystem $filesystem;
-    private ParsedownExtension $markdown;
+    private Markdown $markdown;
     private ?Environment $twig = null;
     private ExampleParser $example;
 
@@ -55,7 +55,7 @@ class Build
         Visibility::PUBLIC);
         $adapter = new LocalFilesystemAdapter($config->getRootPath(), $visibility);
         $this->filesystem = new Filesystem($adapter);
-        $this->markdown = new ParsedownExtension();
+        $this->markdown = new Markdown();
 
         // Setup tags to output code examples from docs
         $this->example = new ExampleParser($this->getTwig(), $this->config, $output, $this->filesystem);
@@ -340,16 +340,16 @@ class Build
             throw new BuildException(sprintf('Cannot load markdown docs file at %s', $sourcePath));
         }
 
+        // Parse markdown
+        $html =  $this->markdown->render($markdown);
+
         // Parse <example> tag
         $this->example->setCurrentFile($sourcePath);
-        $markdown = $this->example->parse($markdown);
+        $html = $this->example->parse($html);
 
         // Parse <colors> tag
         $this->colors->setCurrentFile($sourcePath);
-        $markdown = $this->colors->parse($markdown);
-
-        // Parse markdown
-        $html =  $this->markdown->text($markdown);
+        $html = $this->colors->parse($html);
 
         // Build Twig data
         $data = [

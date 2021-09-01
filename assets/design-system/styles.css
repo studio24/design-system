@@ -961,3 +961,15 @@ main > * {
 	padding-bottom: 1rem;
 	padding-top: 1rem;
 }
+
+
+/*------------------------------------*\
+	Heading permalinks
+\*------------------------------------*/
+a.heading-permalink {
+	color: grey;
+	font-size: 70%;
+	float: left;
+	padding-right: 4px;
+	margin-left: -20px;
+}

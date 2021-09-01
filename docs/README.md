@@ -11,3 +11,4 @@ Useful pages:
   * [Colors](colors.md)
 * [Usage](usage.md)
 * [Extending with custom tags](extending-custom-tags.md)
+* [Contributing to this repo](contributing.md) (either HTML/CSS of design system, or the PHP site generation)

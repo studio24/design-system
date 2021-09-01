@@ -12,7 +12,8 @@ Your documentation files are written in Markdown. This system supports [GitHub f
 
 Please note the following rules for building documentation pages:
 * Only builds `.md` files
-* Any Markdown links to `.md` files are converted to links to `.html` pages
+* Any local links to `.md` Markdown pages are converted to links to `.html` pages
+* Permalinks are added for all headings level H2-H6 
 * Your first heading is used as the navigation title in sibling navigation (or the filename is used if no headings exist)
 * If a page appears in the top navigation it does not appear in the sibling navigation
 * Add a `README.md` as your index page in each directory, if one is not included a simple HTML page with sibling navigation will be generated
