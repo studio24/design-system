@@ -451,13 +451,17 @@ td {
 \*------------------------------------*/
 .global-logo {
 	align-items: center;
-	border-bottom: 1px solid transparent;
+	border: 2px solid transparent;
 	display: inline-flex;
 	text-decoration: none;
 }
 
 .global-logo:hover {
 	border-bottom-color: inherit;
+}
+
+.global-logo:focus {
+	border-color: inherit;
 }
 
 .global-logo svg {
@@ -495,10 +499,6 @@ td {
 	color: #000;
 }
 
-.nav-link:focus::after {
-	display:none;
-}
-
 .global-nav li,
 .section-nav li {
 	position: relative;
@@ -513,7 +513,7 @@ td {
 }
 
 .global-nav li.active::after {
-	bottom: 0.25em;
+	bottom: 3px;
 	height: 3px;
 	left: 0;
 	width: 100%;
