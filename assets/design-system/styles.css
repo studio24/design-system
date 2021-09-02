@@ -652,9 +652,6 @@ main > * {
 	Heading permalinks
 \*------------------------------------*/
 a.heading-permalink {
-	color: grey;
-	font-size: 70%;
-	float: left;
-	padding-right: 4px;
-	margin-left: -20px;
+	color: #005797;
+	padding-right: 0.5em;
 }
