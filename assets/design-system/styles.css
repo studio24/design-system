@@ -489,6 +489,12 @@ td {
 	text-decoration-skip-ink: auto;
 }
 
+.nav-link:focus {
+	background-color: #f9dc4a;
+	background-image: linear-gradient(to top, #000 3px, #f9dc4a 3px, #f9dc4a);
+	color: #000;
+}
+
 .global-nav li,
 .section-nav li {
 	position: relative;
