@@ -68,6 +68,11 @@ class Markdown
             if (count($info) > 1 && !isset($info['path'])) {
                 continue;
             }
+
+            // Replace README links with index links
+            $node->setUrl(preg_replace('/README\.md$/i', 'index.html', $node->getUrl()));
+
+            // Replace *.md links with *.html
             $node->setUrl(preg_replace('/\.md$/i', '.html', $node->getUrl()));
         }
     }
