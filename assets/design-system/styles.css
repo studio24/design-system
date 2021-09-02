@@ -192,13 +192,11 @@ a:not([class]):visited {
 
 a:not([class]):hover,
 a:not([class]):active {
-	color: #005A9C;
+	color: #005a9c;
 	outline-width: 0;
 }
 
-a:not([class]):focus,
-a.with-icon--before:focus,
-a.with-icon--after:focus {
+a:not([class]):focus {
 	background-color: #f9dc4a;
 	background-image: linear-gradient(to top, #000 3px, #f9dc4a 3px, #f9dc4a);
 	color: #000;
@@ -654,4 +652,11 @@ main > * {
 a.heading-permalink {
 	color: #005797;
 	padding-right: 0.5em;
+}
+
+a.heading-permalink:focus {
+	background-color: #f9dc4a;
+	background-image: linear-gradient(to top, #000 3px, #f9dc4a 3px, #f9dc4a);
+	color: #000;
+	text-decoration: none;
 }
