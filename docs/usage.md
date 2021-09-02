@@ -9,7 +9,7 @@ You need to [write your documentation](writing-documentation.md) in Markdown for
 You can run the build process via:
 
 ```
-./vendor/bin design-system
+./vendor/bin/design-system
 ```
 
 This outputs the design system website into the `_dist/` folder.
@@ -19,7 +19,7 @@ This outputs the design system website into the `_dist/` folder.
 You can also enable verbose mode, which outputs more information about what is happening.
 
 ```
-./vendor/bin design-system -v
+./vendor/bin/design-system -v
 ```
 
 ### Options
@@ -38,13 +38,13 @@ You can also run only specific actions via the `--actions` or `-a` option. Avail
 You can specify one or many actions by concatenating them together, e.g.
 
 ```
-./vendor/bin design-system -a=c
+./vendor/bin/design-system -a=c
 ```
 
 or:
 
 ```
-./vendor/bin design-system -a=ad
+./vendor/bin/design-system -a=ad
 ```
 
 ## View the design system website
