@@ -10,7 +10,6 @@
     </tr>
 
     {% for color in group.colors %}
-
     <tr>
         <th scope="row">
 <span class="color-swatch"
@@ -22,18 +21,14 @@
         </th>
         <td>
             <code>
-                {% if color.alt-variable %}
-                {{ color.alt-variable }}
-                {% endif %}
+                {{ attribute(color, 'alt-variable') }}
             </code>
         </td>
         <td>
             {{ color.color }}
         </td>
         <td>
-            {% if color.notes %}
             {{ color.notes }}
-            {% endif %}
         </td>
     </tr>
 

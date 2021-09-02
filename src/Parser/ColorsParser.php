@@ -62,7 +62,6 @@ class ColorsParser extends ParserAbstract
         }
 
         // Validate data
-        $colours = [];
         foreach ($data as $item) {
             $this->keyExists($item, 'title');
             $this->keyExists($item, 'colors');
