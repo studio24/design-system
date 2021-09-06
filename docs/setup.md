@@ -81,3 +81,15 @@ to format your datetime. E.g.
 ```twig
 {{ date|date("d M Y, H:i:s e")  }}
 ```
+
+## Example full-page templates
+
+You can embed and link to [full-page templates](code-examples.md#full-page-templates) within your Design System doc pages.
+
+A small JavaScript file is used for embedded templates in your doc pages, to help fix the appropriate height for the iframe. 
+This will be missing from full-page templates, you can include it by adding the following Twig template code
+to your full-page template (or base layout template:
+
+```twig
+{{ javascript|raw }}
+```

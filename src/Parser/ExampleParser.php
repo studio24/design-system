@@ -4,14 +4,9 @@ declare(strict_types=1);
 namespace Studio24\DesignSystem\Parser;
 
 use League\Flysystem\Filesystem;
-use Studio24\DesignSystem\Build;
 use Studio24\DesignSystem\Config;
-use Studio24\DesignSystem\Exception\BuildException;
-use Studio24\DesignSystem\Exception\DataArrayMissingException;
 use Studio24\DesignSystem\Exception\ExampleTagException;
-use Studio24\DesignSystem\Exception\InvalidFileException;
 use Studio24\DesignSystem\Exception\MissingAttributeException;
-use Studio24\DesignSystem\Exception\PathDoesNotExistException;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Twig\Environment;
 
@@ -88,6 +83,9 @@ class ExampleParser extends ParserAbstract
         if (!isset($data)) {
             $data = [];
         }
+
+        // Pass iframeResizer.contentWindow.min.js to template
+        $data['javascript'] = '<script src="/assets/design-system/js/libraries/iframe-resizer/iframeResizer.contentWindow.min.js"></script>';
 
         // Render example template as HTML
         $rendered = $this->twig->render($filename, $data);
