@@ -10,7 +10,6 @@
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
 
 	<script src="/assets/design-system/js/libraries/fontfaceobserver.js"></script>
-	<script src="/assets/design-system/js/libraries/iframe-resizer/iframeResizer.min.js"></script>
 
 	<script>
 		var myFont = new FontFaceObserver('Noto Sans');
@@ -57,5 +56,12 @@
 	</div>
 
 {% include "@DesignSystem/partials/_footer.html.twig" %}
+
+
+	<!-- iframeResizer https://github.com/davidjbradshaw/iframe-resizer -->
+	<script src="/assets/design-system/js/libraries/iframe-resizer/iframeResizer.min.js"></script>
+	<script>
+		iFrameResize({ log: true }, '.showcase')
+	</script>
 </body>
 </html>

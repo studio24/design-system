@@ -95,7 +95,8 @@ class ExampleParser extends ParserAbstract
         if (!$standalone) {
             $data = [
                 'title' => $title,
-                'html' => $rendered
+                'html' => $rendered,
+                'javascript' => '<script src="/assets/design-system/js/libraries/iframe-resizer/iframeResizer.contentWindow.min.js"></script>'
             ];
             $htmlPage = $this->twig->render('@DesignSystem/example-code.html.twig', $data);
         } else {

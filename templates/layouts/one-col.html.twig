@@ -10,7 +10,6 @@
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
 
 	<script src="/assets/design-system/js/libraries/fontfaceobserver.js"></script>
-	<script src="/assets/design-system/js/libraries/iframe-resizer/iframeResizer.min.js"></script>
 
 	<script>
 		var myFont = new FontFaceObserver('Noto Sans');
@@ -22,6 +21,7 @@
 
 	<!-- Normalize -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+
 	<!-- HighlightJS https://highlightjs.org/ -->
 	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/a11y-dark.min.css">
 	<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
@@ -43,5 +43,12 @@
 
 
 {% include "@DesignSystem/partials/_footer.html.twig" %}
+
+<!-- iframeResizer https://github.com/davidjbradshaw/iframe-resizer -->
+<script src="/assets/design-system/js/libraries/iframe-resizer/iframeResizer.min.js"></script>
+<script>
+	iFrameResize({ log: true }, '.showcase')
+</script>
+
 </body>
 </html>
