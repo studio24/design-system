@@ -35,3 +35,16 @@ Path where your template files are found, relative to the project root. Make sur
 and other templates are in this location.
 
 Default value: `templates/`
+
+## zip_folder
+
+If set to a valid path, relative to the project root, a ZIP archive is created with the contents of the zip_folder path.  
+
+Default value: `null`
+
+## zip_name 
+
+By default the last folder name is used as the ZIP archive filename and folder name in the ZIP archive. You 
+can customise this by passing a zip_name.
+
+Default value: `null`

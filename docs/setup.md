@@ -93,3 +93,14 @@ to your full-page template (or base layout template:
 ```twig
 {{ javascript|raw }}
 ```
+
+## Creating a ZIP archive of frontend assets
+
+You can create a ZIP archive of your frontend assets for easy downloading by developers. This is saved in the `assets/` folder 
+and can be linked to in your markdown (replacing _archive-name_ with the ZIP file name):
+
+```markdown
+Download the [ZIP archive](/assets/archive-name.zip) of the frontend assets
+```
+
+See [zip_folder](configuration.md#zip_folder) for setting this up in your configuration file.

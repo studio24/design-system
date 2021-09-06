@@ -17,4 +17,6 @@ $config = [
     'assets_build_command' => './design-system-build.sh',
     'docs_path'         => 'docs/',
     'templates_path'    => 'templates/',
+    'zip_name'          => null,
+    'zip_folder'        => null,
 ];

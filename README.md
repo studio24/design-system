@@ -11,6 +11,7 @@ Key features:
 * Include sample data for code examples and templates
 * Generate colour swatches in documentation
 * Extensible via custom tags
+* Automatically create ZIP file of frontend assets
 
 ## Requirements
 

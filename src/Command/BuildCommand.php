@@ -44,7 +44,7 @@ class BuildCommand extends Command
                 'a',
                 InputOption::VALUE_REQUIRED,
                 'Which actions to run ("c" = clean, "a" = assets, "p" = layouts, "t" = templates)',
-                'cad'
+                'cadz'
             )
         ;
     }
@@ -89,8 +89,17 @@ class BuildCommand extends Command
             $io->info('Docs layouts built');
         }
 
+        // ZIP
+        if ($this->doZip()) {
+            $io->text('Building ZIP archive...');
+            if ($build->buildZipFile()) {
+                $io->info('Frontend assets ZIP archive built');
+            }
+        }
+
         // Finish up
         $event = $stopwatch->stop(self::$defaultName);
+        $io->newLine();
         $io->text(sprintf('Execution time: %01.2f secs', $event->getDuration() / 1000));
         $io->text(sprintf('Memory usage: %01.2f MB', $event->getMemory()  / 1024 / 1024));
 
@@ -110,6 +119,11 @@ class BuildCommand extends Command
     private function doDocs(): bool
     {
         return strpos($this->actions, 'd') !== false;
+    }
+
+    private function doZip(): bool
+    {
+        return strpos($this->actions, 'z') !== false;
     }
 
 }

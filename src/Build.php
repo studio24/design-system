@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Studio24\DesignSystem;
 
+use Alchemy\Zippy\Zippy;
 use League\Flysystem\FileAttributes;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemException;
@@ -371,6 +372,47 @@ class Build
         $this->filesystem->write($destination, $html);
         if ($this->output->isVerbose()) {
             $this->output->text('* ' . $destination);
+        }
+    }
+
+    /**
+     * Create ZIP file of website assets for developer use
+     *
+     * @see https://github.com/alchemy-fr/Zippy
+     */
+    public function buildZipFile()
+    {
+        if (!$this->config->has('zip_folder')) {
+            $this->output->text('Skipping, no ZIP folder defined in config');
+            return false;
+        }
+
+        $zipFolder = $this->config->get('zip_folder');
+        $zipName = $this->config->get('zip_name');
+
+        if (empty($zipFolder)) {
+            $this->output->text('Skipping, no ZIP folder defined in config');
+            return false;
+        }
+        if (empty($zipName)) {
+            $zipName = pathinfo($zipFolder, PATHINFO_BASENAME);
+        }
+
+        try {
+            $destination = $this->config->buildPath(Config::ASSETS_PATH, $zipName);
+            $zippy = Zippy::load();
+            $archive = $zippy->create($destination, [
+                $zipName => $zipFolder
+            ], true);
+
+            if ($this->output->isVerbose()) {
+                $this->output->text('* ' . $destination);
+            }
+
+            return true;
+
+        } catch (\Alchemy\Zippy\Exception\ExceptionInterface $exception) {
+            throw new BuildException(sprintf('Cannot build ZIP archive for folder %s, error: %s', $zipFolder, $exception->getMessage()));
         }
     }
 
