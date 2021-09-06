@@ -387,22 +387,31 @@ class Build
             return false;
         }
 
+        // Path to folder to add to ZIP archive (relative to project root)
         $zipFolder = $this->config->get('zip_folder');
-        $zipName = $this->config->get('zip_name');
-
         if (empty($zipFolder)) {
             $this->output->text('Skipping, no ZIP folder defined in config');
             return false;
         }
+        $source = $this->config->getFullPath($zipFolder);
+        if (!is_dir($source)) {
+            throw new BuildException(sprintf('Cannot build ZIP archive since folder %s does not exit, full source path: %s', $zipFolder, $source));
+        }
+
+        // Name of ZIP folder / archive file
+        $zipName = null;
+        if ($this->config->has('zip_name')) {
+            $zipName = $this->config->get('zip_name');
+        }
         if (empty($zipName)) {
             $zipName = pathinfo($zipFolder, PATHINFO_BASENAME);
         }
+        $destination = $this->config->getFullPath($this->config->buildPath(Config::ASSETS_PATH, $zipName)) . '.zip';
 
         try {
-            $destination = $this->config->buildPath(Config::ASSETS_PATH, $zipName);
             $zippy = Zippy::load();
             $archive = $zippy->create($destination, [
-                $zipName => $zipFolder
+                $zipName => $source
             ], true);
 
             if ($this->output->isVerbose()) {
@@ -412,7 +421,7 @@ class Build
             return true;
 
         } catch (\Alchemy\Zippy\Exception\ExceptionInterface $exception) {
-            throw new BuildException(sprintf('Cannot build ZIP archive for folder %s, error: %s', $zipFolder, $exception->getMessage()));
+            throw new BuildException(sprintf('Cannot build ZIP archive for folder %s, destination %s, error: %s', $zipFolder, $destination, $exception->getMessage()));
         }
     }
 

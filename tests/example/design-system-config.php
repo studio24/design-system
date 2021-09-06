@@ -13,5 +13,6 @@ $config = [
         'Guidelines' => '/guidelines/',
         'Templates' => '/templates/',
     ],
+    'zip_folder' => 'apollo/assets'
 ];
 
