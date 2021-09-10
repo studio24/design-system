@@ -287,7 +287,7 @@ class Build
         // Build layouts
         foreach ($pages as $subDirectory => $children) {
             foreach ($children as $page) {
-                $this->buildDocsPage($page['source'], $page['destination'], $siblingNavigation[$subDirectory]);
+                $this->buildDocsPage($page['title'], $page['source'], $page['destination'], $siblingNavigation[$subDirectory]);
             }
         }
 
@@ -309,7 +309,8 @@ class Build
 
         $data = [
             'date'  => new \DateTime(),
-            'title' => ucfirst($directory),
+            'site_title' => $this->config->get('site_title'),
+            'title' => $this->config->getPageTitle(ucfirst($directory)),
             'sibling_navigation' => $siblingNavigation,
             'navigation' => $this->config->getNavigation($this->config->getDistUrl($destination)),
         ];
@@ -323,6 +324,8 @@ class Build
 
     /**
      * Render markdown page and save
+     *
+     * @param string $title Page title
      * @param string $sourcePath Source file to read markdown from
      * @param string $destination Destination to save HTML page to
      * @param array $siblingNavigation Links to sibling layouts
@@ -331,7 +334,7 @@ class Build
      * @throws \Twig\Error\RuntimeError
      * @throws \Twig\Error\SyntaxError
      */
-    public function buildDocsPage(string $sourcePath, string $destination, array $siblingNavigation)
+    public function buildDocsPage(string $title, string $sourcePath, string $destination, array $siblingNavigation)
     {
         $twig = $this->getTwig();
 
@@ -354,7 +357,9 @@ class Build
 
         // Build Twig data
         $data = [
+            'site_title'         => $this->config->get('site_title'),
             'date'               => new \DateTime(),
+            'title'              => $this->config->getPageTitle($title),
             'contents'           => $html,
             'sibling_navigation' => $siblingNavigation,
         ];

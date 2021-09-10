@@ -10,6 +10,7 @@
  * @see https://github.com/studio24/design-system/blob/main/docs/configuration.md
  */
 $config = [
+    'site_title'        => null,
     'navigation'        => [
         'Home'          => '/',
         'Templates'     => '/code/templates/',

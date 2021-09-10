@@ -17,6 +17,7 @@ class Config
     const DIST_PATH = '_dist';
     const CODE_PATH = self::DIST_PATH . '/code';
     const ASSETS_PATH = self::DIST_PATH . '/assets';
+    const PAGE_TITLE_SEPARATOR = ' - ';
 
     private string $rootPath;
     private Filesystem $filesystem;
@@ -26,6 +27,7 @@ class Config
      * @var array
      */
     private array $config = [
+        'site_title'        => null,
         'navigation'        => [
             'Home'          => '/',
             'Templates'     => '/code/templates/',
@@ -207,7 +209,7 @@ class Config
     public function get(string $name)
     {
         if (!$this->has($name)) {
-            throw new ConfigException(sprintf('Config name %s not found', $name));
+            return null;
         }
         return $this->config[$name];
     }
@@ -245,6 +247,21 @@ class Config
         }
         chmod($absolutePath, 0755);
         return true;
+    }
+
+    /**
+     * Return page title, suffixed with site_title if exists
+     * @param string $title
+     * @return string
+     * @throws ConfigException
+     */
+    public function getPageTitle(string $title): string
+    {
+        $siteTitle = $this->get('site_title');
+        if (!empty($siteTitle)) {
+            return $title . self::PAGE_TITLE_SEPARATOR . $siteTitle;
+        }
+        return $title;
     }
 
 }

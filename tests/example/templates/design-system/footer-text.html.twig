@@ -1,1 +1,3 @@
-<p>Custom footer text. Generated {{ date|date("d M Y, H:i:s e")   }}</p>
+<p>CUSTOM TEXT {% if site_title  %}{{ site_title }} - {% endif %}
+    Page generated {{ date|date("d M Y, H:i:s e")   }}
+</p>

@@ -29,6 +29,12 @@ Path where to build documentation pages from, relative to the project root.
 
 Default value: `docs/`
 
+## site_title
+
+The design system website title, this is outputted after page titles (the `<title>` tag) and in the footer.
+
+Default value: `null`
+
 ## templates_path
 
 Path where your template files are found, relative to the project root. Make sure all your code examples 
