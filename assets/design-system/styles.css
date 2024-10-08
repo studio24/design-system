@@ -167,6 +167,11 @@ code {
 	color: #b30000;
 }
 
+pre code {
+	tab-size: 4;
+	white-space: pre;
+}
+
 kbd {
 	background-color: #eaeaea;
 	border: solid 1px #ccc;
