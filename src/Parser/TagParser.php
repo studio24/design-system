@@ -21,7 +21,7 @@ class TagParser
     public function matchAll(string $html, string $htmlTag): array
     {
         if (!preg_match('/^<.+>$/', $htmlTag)) {
-            throw new HtmlParserException(sprintf('HTML tag must start and end with < >, passed tag: %', $htmlTag));
+            throw new HtmlParserException(sprintf('HTML tag must start and end with < >, passed tag: %s', $htmlTag));
         }
 
         // Build array of matches and function params

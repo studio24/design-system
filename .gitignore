@@ -2,3 +2,5 @@ vendor
 .phpunit.result.cache
 package-lock.json
 tests/example/apollo
+composer.lock
+var/cache/*
