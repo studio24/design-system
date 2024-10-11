@@ -45,3 +45,23 @@ The PHP code to generate the design system static site is in:
 
 Most of the business logic of the site build process is in the `src/Build.php` file. This loads the design system 
 configuration via the `src/Config.php` class. 
+
+## Testing your changes
+
+You can test your changes by using the example project.
+
+Build files:
+
+```
+cd tests/example
+../../bin/design-system
+```
+
+Serve: 
+
+```
+cd _dist/
+php -S localhost:8000
+```
+
+Test at: http://localhost:8000
