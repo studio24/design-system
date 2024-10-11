@@ -95,7 +95,7 @@ class Markdown
      */
     public function render(string $content): string
     {
-        return $this->getConvertor()->convertToHtml($content);
+        return $this->getConvertor()->convert($content);
     }
 
 }

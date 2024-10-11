@@ -31,7 +31,6 @@ EOD;
 
         $html = $markdown->render($text);
 
-var_dump($html);
         $this->assertStringContainsString('<a href="https://www.bbc.co.uk/testing.md">https://www.bbc.co.uk/testing.md</a>', $html, 'Auto-link, do not convert external .md links');
         $this->assertStringContainsString('<a href="docs/testing.html">Internal link</a>', $html, 'Convert local .md links');
         $this->assertStringNotContainsString('<h1><a id="hello-testing" href="#hello-testing" class="heading-permalink" aria-hidden="true" title="Permalink">¶</a>Hello testing</h1>', $html, 'Auto-link headings');
