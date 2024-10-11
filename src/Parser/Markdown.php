@@ -65,7 +65,7 @@ class Markdown
 
             // Only update if a local URL
             $info = parse_url($node->getUrl());
-            if (count($info) > 1 && !isset($info['path'])) {
+            if (count($info) > 1 && isset($info['host'])) {
                 continue;
             }
 
