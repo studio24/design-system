@@ -51,6 +51,8 @@ php -S localhost:8000 -t _dist
 
 See [docs](docs/README.md) for further details.
 
+See [contributing](docs/contributing.md) for making changes to this repo.
+
 ## License
 
 [MIT License](LICENSE) (MIT) Copyright (c) 2020 Studio 24 Ltd (www.studio24.net)

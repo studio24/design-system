@@ -19,6 +19,10 @@ Please work on branches when making changes.
 
 Please create a Pull Request to merge changes into master, all Pull Requests need at least one approval from the Studio 24 development team.
 
+## Versioning
+
+Please create a new release once code is merged via a PR using [semantic versioning](https://semver.org/). Versions are managed via GitHub releases.
+
 ## HTML/CSS of design system site
 
 The design system templates  and front-end assets are stored in:
