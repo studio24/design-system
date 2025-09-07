@@ -11,7 +11,7 @@
         "league/flysystem": "^3.3",
         "masterminds/html5": "^2.7",
         "league/commonmark": "^2.0",
-        "alchemy/zippy": "^1.0"
+        "maennchen/zipstream-php": "^3.2"
     },
     "require-dev": {
         "overtrue/phplint": "^9.0",

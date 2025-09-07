@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Studio24\DesignSystem;
 
-use Alchemy\Zippy\Zippy;
 use League\Flysystem\FileAttributes;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemException;
@@ -20,6 +19,8 @@ use Studio24\DesignSystem\Parser\Markdown;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Twig\Loader\FilesystemLoader;
 use Twig\Environment;
+use ZipStream\Exception;
+use ZipStream\ZipStream;
 
 class Build
 {
@@ -383,7 +384,7 @@ class Build
     /**
      * Create ZIP file of website assets for developer use
      *
-     * @see https://github.com/alchemy-fr/Zippy
+     * @see https://maennchen.dev/ZipStream-PHP/guide/FlySystem.html
      */
     public function buildZipFile()
     {
@@ -404,28 +405,39 @@ class Build
         }
 
         // Name of ZIP folder / archive file
-        $zipName = null;
+        $destination = $this->config->getFullPath(Config::ASSETS_PATH);
+        $zipFilename = null;
         if ($this->config->has('zip_name')) {
-            $zipName = $this->config->get('zip_name');
+            $zipFilename = $this->config->get('zip_name');
         }
-        if (empty($zipName)) {
-            $zipName = pathinfo($zipFolder, PATHINFO_BASENAME);
+        if (empty($zipFilename)) {
+            $zipFilename = pathinfo($zipFolder, PATHINFO_BASENAME);
         }
-        $destination = $this->config->getFullPath($this->config->buildPath(Config::ASSETS_PATH, $zipName)) . '.zip';
+        $zipFilename .= '.zip';
 
         try {
-            $zippy = Zippy::load();
-            $archive = $zippy->create($destination, [
-                $zipName => $source
-            ], true);
+            // Open temp stream
+            $tempStream = fopen('php://memory', 'w+');
+            $zipStream = new ZipStream(
+                outputStream: $tempStream,
+                outputName: $zipFilename,
+            );
 
-            if ($this->output->isVerbose()) {
-                $this->output->text('* ' . $destination);
-            }
+            // Build ZIP
+            $zipStream->addFile('test.txt', 'text');
+            $zipStream->finish();
+
+            // Store File
+            $adapter = new LocalFilesystemAdapter($destination);
+            $filesystem = new Filesystem($adapter);
+            $filesystem->writeStream($zipFilename, $tempStream);
+
+            // Close stream
+            fclose($tempStream);
 
             return true;
 
-        } catch (\Alchemy\Zippy\Exception\ExceptionInterface $exception) {
+        } catch (Exception $exception) {
             throw new BuildException(sprintf('Cannot build ZIP archive for folder %s, destination %s, error: %s', $zipFolder, $destination, $exception->getMessage()));
         }
     }
