@@ -4,3 +4,5 @@ package-lock.json
 tests/example/apollo
 composer.lock
 var/cache/*
+.phplint.cache
+.phpunit.cache

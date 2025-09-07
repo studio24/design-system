@@ -48,7 +48,7 @@ class Config
      * @throws PathDoesNotExistException
      * @throws \League\Flysystem\FilesystemException
      */
-    public function __construct(string $rootPath, string $configPath = null)
+    public function __construct(string $rootPath, ?string $configPath = null)
     {
         $this->setRootPath($rootPath);
         $adapter = new LocalFilesystemAdapter($rootPath);
@@ -65,7 +65,7 @@ class Config
      * @param ?string $currentUrl
      * @return array
      */
-    public function getNavigation(string $currentUrl = null): array
+    public function getNavigation(?string $currentUrl = null): array
     {
         $navigation = [];
         foreach ($this->get('navigation') as $label => $url) {
