@@ -62,7 +62,6 @@ class Markdown
 
         /** @var Link $node */
         foreach ($matchingNodes as $node) {
-
             // Only update if a local URL
             $info = parse_url($node->getUrl());
             if (count($info) > 1 && isset($info['host'])) {
@@ -97,5 +96,4 @@ class Markdown
     {
         return $this->getConvertor()->convert($content);
     }
-
 }

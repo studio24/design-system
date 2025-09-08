@@ -10,7 +10,6 @@ use Studio24\DesignSystem\Exception\HtmlParserException;
  */
 class TagParser
 {
-
     /**
      * Match all HTML tags in an HTML string
      *
@@ -92,5 +91,4 @@ class TagParser
 
         return $data;
     }
-
 }

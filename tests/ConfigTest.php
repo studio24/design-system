@@ -3,13 +3,11 @@
 namespace Tests;
 
 use PHPUnit\Framework\TestCase;
-
 use Studio24\Apollo\Command\BuildCommand;
 use Studio24\DesignSystem\Config;
 
 class ConfigTest extends TestCase
 {
-
     public function testSaveDefaultConfigFile()
     {
         $testConfigPath = __DIR__ . '/temp/test.design-system-config2.php';
@@ -24,5 +22,4 @@ class ConfigTest extends TestCase
         $this->assertTrue($resultCode === 0, $result);
         unlink($testConfigPath);
     }
-
 }

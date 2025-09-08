@@ -263,5 +263,4 @@ class Config
         }
         return $title;
     }
-
 }

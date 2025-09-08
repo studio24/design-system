@@ -12,6 +12,7 @@
 
     <!-- Command line options -->
     <!-- see https://github.com/squizlabs/PHP_CodeSniffer/wiki/Usage -->
+     <arg name="extensions" value="php" />
     <arg name="basepath" value="."/>
     <arg name="colors"/>
     <arg name="parallel" value="75"/>

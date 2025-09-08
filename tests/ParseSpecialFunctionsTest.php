@@ -8,7 +8,6 @@ use Studio24\DesignSystem\Parser\TagParser;
 
 final class ParseSpecialFunctionsTest extends TestCase
 {
-
     public function testMatchAll()
     {
         $parser = new TagParser();
@@ -46,6 +45,4 @@ EOD;
         $this->expectException(HtmlParserException::class);
         $matches = $parser->matchAll('<p>some text</p>', 'example');
     }
-
-
 }

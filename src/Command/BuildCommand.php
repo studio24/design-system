@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Studio24\DesignSystem\Command;
@@ -125,5 +126,4 @@ class BuildCommand extends Command
     {
         return strpos($this->actions, 'z') !== false;
     }
-
 }

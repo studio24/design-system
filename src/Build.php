@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Studio24\DesignSystem;
@@ -44,7 +45,8 @@ class Build
         $this->output = $output;
 
         // Set default file permissions
-        $visibility = PortableVisibilityConverter::fromArray([
+        $visibility = PortableVisibilityConverter::fromArray(
+            [
             'file' => [
                 'public' => 0644,
                 'private' => 0600,
@@ -53,8 +55,9 @@ class Build
                 'public' => 0755,
                 'private' => 0700,
             ],
-        ],
-        Visibility::PUBLIC);
+            ],
+            Visibility::PUBLIC
+        );
         $adapter = new LocalFilesystemAdapter($config->getRootPath(), $visibility);
         $this->filesystem = new Filesystem($adapter);
         $this->markdown = new Markdown();
@@ -111,7 +114,6 @@ class Build
         try {
             $this->filesystem->deleteDirectory($destination);
             $this->filesystem->createDirectory($destination);
-
         } catch (FilesystemException | UnableToDeleteDirectory $exception) {
             throw new BuildException(sprintf('Cannot clean destination folder, error: %s', $exception->getMessage()));
         }
@@ -131,13 +133,13 @@ class Build
         }
 
         // Change dir, then run command
-        $command = sprintf('cd %s && %s',$this->config->getRootPath(), $command);
+        $command = sprintf('cd %s && %s', $this->config->getRootPath(), $command);
         $output = '';
 
         if ($passthru) {
-            passthru($command,$status);
+            passthru($command, $status);
         } else {
-            exec($command,$output,$status);
+            exec($command, $output, $status);
         }
 
         if ($status !== 0) {
@@ -246,7 +248,7 @@ class Build
 
         // Sort layouts in each sub-directory
         foreach ($pages as $subDirectory => $children) {
-            uasort($pages[$subDirectory], function($a, $b) {
+            uasort($pages[$subDirectory], function ($a, $b) {
                 // Stick index layouts to top
                 if ($a['filename'] === 'index') {
                     return -1;
@@ -436,10 +438,8 @@ class Build
             fclose($tempStream);
 
             return true;
-
         } catch (Exception $exception) {
             throw new BuildException(sprintf('Cannot build ZIP archive for folder %s, destination %s, error: %s', $zipFolder, $destination, $exception->getMessage()));
         }
     }
-
 }
