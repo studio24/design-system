@@ -15,5 +15,5 @@ $config = [
         'Guidelines' => '/guidelines/',
         'Templates' => '/templates/',
     ],
-    'zip_folder' => 'apollo/assets'
+    'zip_folder' => '_dist/assets/design-system'
 ];

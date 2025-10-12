@@ -130,7 +130,7 @@ class Config
         }
 
         // Require config file, which must contain a $config array
-        require $configPath;
+        require $this->getFullPath($configPath);
         if (!isset($config) || !is_array($config)) {
             throw new ConfigException(sprintf('Config file %s must contain the $config variable and it must be an array', $configPath));
         }

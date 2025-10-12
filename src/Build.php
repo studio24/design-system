@@ -20,8 +20,9 @@ use Studio24\DesignSystem\Parser\Markdown;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Twig\Loader\FilesystemLoader;
 use Twig\Environment;
-use ZipStream\Exception;
-use ZipStream\ZipStream;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use ZipArchive;
 
 class Build
 {
@@ -386,7 +387,7 @@ class Build
     /**
      * Create ZIP file of website assets for developer use
      *
-     * @see https://maennchen.dev/ZipStream-PHP/guide/FlySystem.html
+     * @see https://www.php.net/manual/en/class.ziparchive.php
      */
     public function buildZipFile()
     {
@@ -394,11 +395,9 @@ class Build
             $this->output->text('Skipping, no ZIP folder defined in config');
             return false;
         }
-
-        // Path to folder to add to ZIP archive (relative to project root)
         $zipFolder = $this->config->get('zip_folder');
         if (empty($zipFolder)) {
-            $this->output->text('Skipping, no ZIP folder defined in config');
+            $this->output->text('Skipping, no source folder to creat a ZIP defined in config');
             return false;
         }
         $source = $this->config->getFullPath($zipFolder);
@@ -407,39 +406,38 @@ class Build
         }
 
         // Name of ZIP folder / archive file
-        $destination = $this->config->getFullPath(Config::ASSETS_PATH);
-        $zipFilename = null;
+        $zipName = null;
         if ($this->config->has('zip_name')) {
-            $zipFilename = $this->config->get('zip_name');
+            $zipName = $this->config->get('zip_name');
         }
-        if (empty($zipFilename)) {
-            $zipFilename = pathinfo($zipFolder, PATHINFO_BASENAME);
+        if (empty($zipName)) {
+            $zipName = pathinfo($zipFolder, PATHINFO_BASENAME);
         }
-        $zipFilename .= '.zip';
+        $destination = $this->config->getFullPath($this->config->buildPath(Config::ASSETS_PATH, $zipName)) . '.zip';
 
-        try {
-            // Open temp stream
-            $tempStream = fopen('php://memory', 'w+');
-            $zipStream = new ZipStream(
-                outputStream: $tempStream,
-                outputName: $zipFilename,
-            );
-
-            // Build ZIP
-            $zipStream->addFile('test.txt', 'text');
-            $zipStream->finish();
-
-            // Store File
-            $adapter = new LocalFilesystemAdapter($destination);
-            $filesystem = new Filesystem($adapter);
-            $filesystem->writeStream($zipFilename, $tempStream);
-
-            // Close stream
-            fclose($tempStream);
-
-            return true;
-        } catch (Exception $exception) {
-            throw new BuildException(sprintf('Cannot build ZIP archive for folder %s, destination %s, error: %s', $zipFolder, $destination, $exception->getMessage()));
+        // Setup ZIP archive
+        $zip = new ZipArchive();
+        if ($zip->open($destination, ZipArchive::CREATE) !== true) {
+            throw new BuildException(sprintf('Cannot create ZIP archive at %s', $destination));
         }
+
+        // ZIP folders
+        $info = pathinfo($source);
+        $zipFolderRegex = '/^' . preg_quote($info["dirname"] . '/' . $info["basename"], '/') . '/';
+
+        // Add all files in source folder to ZIP
+        $flags = \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::CURRENT_AS_SELF;
+        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source, $flags));
+        /** @var RecursiveDirectoryIterator $file */
+        foreach ($files as $file) {
+            $filepath = $file->getPathname();
+            $zipPath = preg_replace($zipFolderRegex, '', $filepath);
+            $zip->addFile($filepath, $zipPath);
+        }
+
+        if (!$zip->close()) {
+            throw new BuildException(sprintf('Cannot save ZIP archive at %s', $destination));
+        }
+        return true;
     }
 }

@@ -50,18 +50,24 @@ configuration via the `src/Config.php` class.
 
 You can test your changes by using the example project.
 
+Run Composer install in the root:
+
+```shell
+composer install
+```
+
+If you have errors with this delete your local `composer.lock` file and try again.
+
 Build files:
 
-```
-cd tests/example
-../../bin/design-system
+```shell
+bin/design-system --path=tests/example
 ```
 
 Serve: 
 
 ```
-cd _dist/
-php -S localhost:8000
+php -S localhost:8000 -t tests/example/_dist/
 ```
 
 Test at: http://localhost:8000

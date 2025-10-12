@@ -1,8 +1,7 @@
 vendor
-.phpunit.result.cache
 package-lock.json
-tests/example/apollo
 composer.lock
 var/cache/*
-.phplint.cache
 .phpunit.cache
+.phpunit.result.cache
+.phplint.cache
