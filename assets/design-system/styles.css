@@ -39,25 +39,22 @@
 	#Base
 \*------------------------------------*/
 html {
-	height: 100%;
+	block-size: 100%;
 }
 
 
 body {
 	background-color: #fff;
 	color: #1a1c1b;
-	display: -ms-grid;
 	display: grid;
-	-ms-grid-columns: 100%;
 	font-family: "Trebuchet MS", Geneva, sans-serif;
 	font-size: 1rem;
 	font-style: normal;
 	font-weight: 400;
 	grid-template-columns: 100%;
-	-ms-grid-rows: 1fr auto;
 	grid-template-rows: 1fr auto;
 	line-height: 1.5;
-	min-height: 100%;
+	min-block-size: 100%;
 	overflow-x: hidden;
 	-moz-osx-font-smoothing: grayscale;
 	-webkit-font-smoothing: antialiased;
@@ -103,16 +100,14 @@ main:focus,
 
 .visuallyhidden:not(:focus):not(:active),
 .skip-link:not(:focus):not(:active) {
+	block-size: 1px;
 	border: 0;
-	clip: rect(0 0 0 0);
-	-webkit-clip-path: inset(100%);
-	clip-path: inset(100%);
-	height: 1px;
+	clip-path: inset(50%);
+	inline-size: 1px;
 	overflow: hidden;
 	padding: 0;
 	position: absolute;
 	white-space: nowrap;
-	width: 1px;
 }
 
 
@@ -120,25 +115,25 @@ main:focus,
 .hidden + *,
 .visuallyhidden + *,
 .skip-link + * {
-	margin-top: 0 !important;
+	margin-block-start: 0 !important;
 }
 
 
 br {
-	margin-top: 0;
+	margin-block-start: 0;
 }
 
 
 svg {
+	block-size: auto;
 	fill: currentColor;
-	height: auto;
-	width: 100%;
+	max-inline-size: 100%;
 }
 
 
 img {
-	height: auto;
-	width: 100%;
+	block-size: auto;
+	max-inline-size: 100%;
 }
 
 abbr {
@@ -185,10 +180,10 @@ a:not([class]) {
 	border: 0;
 	color: #005A9C;
 	cursor: pointer;
-	padding-left: 0.125rem;
-	padding-right: 0.125rem;
+	padding-inline: 0.125rem;
 	text-decoration: underline;
-	text-decoration-skip-ink: auto;
+	text-decoration-skip: auto;
+	text-decoration-skip-ink: auto
 }
 
 a:not([class]):visited {
@@ -228,18 +223,16 @@ ul:not([class]) li ol,
 ol:not([class]) > * + *,
 ol:not([class]) li ul,
 ol:not([class]) li ol {
-	margin-top: 0.75em;
+	margin-block-start: 0.75em;
 }
 
 ul:not([class]) {
-	-webkit-padding-start: 2.4em;
 	padding-inline-start: 2.4em;
 }
 
 ol:not([class]) {
 	counter-reset: count;
 	list-style-type: none;
-	-webkit-padding-start: 1.25em;
 	padding-inline-start: 1.25em;
 }
 
@@ -249,7 +242,6 @@ ol:not([class]) > li {
 
 ol:not([class]) > li::before {
 	content: counters(count, ".") " ";
-	-webkit-padding-end: 0.5em;
 	padding-inline-end: 0.5em;
 }
 
@@ -261,14 +253,14 @@ ol:not([class]) > li::before {
 
 .inline-list li {
 	display: inline-block;
-	margin-bottom: 0.5em;
-	margin-right: 1.5em;
-	margin-top: 0;
+	margin-block-end: 0.5em;
+	margin-block-start: 0;
+	margin-inline-end: 1.5em;
 }
 
 .inline-list li:last-child {
-	margin-bottom: 0;
-	margin-right: 0;
+	margin-block-end: 0;
+	margin-inline-end: 0;
 }
 
 
@@ -277,12 +269,12 @@ dl dt {
 }
 
 dl dd + dt {
-	margin-top: 0.5em;
+	margin-block-start: 0.5em;
 }
 
 dl dt + dd,
 dl dd + dd {
-	margin-top: 0.25em;
+	margin-block-start: 0.25em;
 }
 
 
@@ -295,9 +287,9 @@ dl dd + dd {
 }
 
 .skip-link:active, .skip-link:focus {
-	left: 0;
+	inset-block-start: 0;
+	inset-inline-start: 0;
 	position: absolute;
-	top: 0;
 	z-index: 999;
 }
 
@@ -310,7 +302,7 @@ dl dd + dd {
 table {
 	border: 1px solid;
 	border-collapse: collapse;
-	width: 100%;
+	inline-size: 100%;
 }
 
 tr:nth-child(even) {
@@ -321,7 +313,6 @@ th,
 td,
 table caption {
 	padding: 0.75rem;
-	text-align: left;
 	text-align: start;
 }
 
@@ -335,7 +326,8 @@ th[scope="col"] {
 }
 
 td {
-	vertical-align: text-top; }
+	vertical-align: text-top;
+}
 
 
 
@@ -361,28 +353,16 @@ td {
 
 .l-center {
 	box-sizing: content-box;
-	margin-left: auto;
-	margin-right: auto;
-	max-width: 70rem;
-	padding-left: 5vw;
-	padding-right: 5vw;
+	margin-inline: auto;
+	max-inline-size: 70rem;
+	padding-inline: 5vw;
 }
 
 
 .l-cluster {
-	overflow: hidden;
-}
-
-.l-cluster > * {
 	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	margin: calc(1rem / 2 * -1);
-}
-
-.l-cluster > * > * {
-	display: inline-block;
-	margin: calc(1rem / 2);
+	flex-flow: row wrap;
+	gap: 1rem;
 }
 
 
@@ -410,7 +390,7 @@ td {
 }
 
 .l-sidebar .sidebar > * + * {
-	margin-top: 1.5rem;
+	margin-block-start: 1.5rem;
 }
 
 .l-sidebar .not-sidebar {
@@ -419,7 +399,7 @@ td {
 	flex-direction: column;
 	flex-grow: 999;
 	justify-content: flex-start;
-	min-width: calc(55% - 1.7rem);
+	min-inline-size: calc(55% - 1.7rem);
 }
 
 
@@ -430,7 +410,7 @@ td {
 }
 
 .l-stack > * + * {
-	margin-top: 1.5rem;
+	margin-block-start: 1.5rem;
 }
 
 
@@ -439,9 +419,8 @@ td {
 	#Global header
 \*------------------------------------*/
 .global-header {
-	margin-bottom: 2rem;
-	padding-bottom: 1rem;
-	padding-top: 1rem;
+	margin-block-end: 2rem;
+	padding-block: 1rem;
 }
 
 .global-header__inner {
@@ -457,7 +436,9 @@ td {
 .global-logo {
 	align-items: center;
 	border: 2px solid transparent;
-	display: inline-flex;
+	gap: 1rem;
+	display: flex;
+	padding-block-end: 2px;
 	text-decoration: none;
 }
 
@@ -471,14 +452,11 @@ td {
 
 .global-logo svg {
 	display: block;
-	height: 3rem;
-	width: 4.5rem;
 }
 
-.global-logo span {
+.global-logo span:not(.visuallyhidden) {
 	font-size: 1.7rem;
 	font-weight: bold;
-	margin-left: 0.5em;
 }
 
 
@@ -518,18 +496,18 @@ td {
 }
 
 .global-nav li.active::after {
-	bottom: 3px;
-	height: 3px;
-	left: 0;
-	width: 100%;
+	block-size: 3px;
+	inset-block-end: 3px;
+	inline-size: 100%;
+	inset-inline-start: 0;
 }
 
 .section-nav li.active::after {
-	height: 60%;
-	left: -3px;
-	top: 50%;
+	block-size: 60%;
+	inset-inline-start: -3px;
+	inset-block-start: 50%;
 	transform: translateY(-50%);
-	width: 3px;
+	inline-size: 3px;
 }
 
 .global-nav li.active .nav-link:hover,
@@ -543,7 +521,7 @@ td {
 	#Main
 \*------------------------------------*/
 main > * {
-	max-width: 43rem;
+	max-inline-size: 43rem;
 }
 
 
@@ -558,14 +536,14 @@ main > * {
 }
 
 .swatches tr {
-	border-bottom: solid 0.625rem transparent;
+	border-block-end: solid 0.625rem transparent;
 	display: table-row;
 }
 
 .swatches th {
 	display: block;
 	font-weight: normal;
-	padding-left: 3.125rem;
+	padding-inline-start: 3.125rem;
 	position: relative;
 }
 
@@ -579,21 +557,21 @@ main > * {
 }
 
 .color-swatch {
+	block-size: 2.5rem;
 	border: 1px black dashed;
 	border-radius: 4px;
 	display: block;
-	height: 2.5rem;
-	left: 0;
+	inline-size: 2.5rem;
+	inset-block-start: 0;
+	inset-inline-start: 0;
 	position: absolute;
-	top: 0;
-	width: 2.5rem;
 }
 
 @media screen and (min-width: 48em) {
 
 	.color-swatch {
 		display: inline-block;
-		margin-right: 0.625rem;
+		margin-inline-end: 0.625rem;
 		position: static;
 		vertical-align: middle;
 	}
@@ -603,7 +581,7 @@ main > * {
 .swatches th,
 .swatches td {
 	display: block;
-	padding-left: 3.125rem;
+	padding-inline-start: 3.125rem;
 	position: relative;
 }
 
@@ -623,8 +601,8 @@ main > * {
 	#Code snippet containers
 \*------------------------------------*/
 .hljs.hljs {
-	max-height: 30rem;
-	max-width: 43rem;
+	max-block-size: 30rem;
+	max-inline-size: 43rem;
 	padding: 1rem;
 }
 
@@ -642,9 +620,9 @@ main > * {
 .showcase {
 	border: solid 1px;
 	display: block;
-	min-width: 100%;
+	inline-size: 1px;
+	min-inline-size: 100%;
 	padding: 1rem;
-	width: 1px;
 }
 
 
@@ -653,11 +631,9 @@ main > * {
 	#Global footer
 \*------------------------------------*/
 .global-footer {
-	-ms-grid-row: 2;
 	grid-row-start: 2;
 	grid-row-end: 3;
-	padding-bottom: 1rem;
-	padding-top: 1rem;
+	padding-block: 1rem;
 }
 
 
@@ -666,7 +642,7 @@ main > * {
 \*------------------------------------*/
 a.heading-permalink {
 	color: #005797;
-	padding-right: 0.5em;
+	padding-inline-end: 0.5em;
 }
 
 a.heading-permalink:focus {
