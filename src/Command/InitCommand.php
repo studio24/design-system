@@ -20,7 +20,6 @@ use Symfony\Component\Stopwatch\Stopwatch;
 #[AsCommand(name: 'init')]
 class InitCommand extends Command
 {
-
     protected function configure(): void
     {
         $this
