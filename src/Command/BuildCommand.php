@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Studio24\DesignSystem\Command;
@@ -7,6 +8,7 @@ use Studio24\DesignSystem\Build;
 use Studio24\DesignSystem\Config;
 use Studio24\DesignSystem\Exception\BuildException;
 use Studio24\DesignSystem\Version;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -15,12 +17,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Stopwatch\Stopwatch;
 
+#[AsCommand(name: 'build')]
 class BuildCommand extends Command
 {
-    protected static $defaultName = 'build';
     protected string $actions;
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setDescription('Build design system website')
@@ -43,16 +45,16 @@ class BuildCommand extends Command
                 'actions',
                 'a',
                 InputOption::VALUE_REQUIRED,
-                'Which actions to run ("c" = clean, "a" = assets, "p" = layouts, "t" = templates)',
+                'Which actions to run ("c" = clean, "a" = assets, "d" = docs, "z" = zip)',
                 'cadz'
             )
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $stopwatch = new Stopwatch();
-        $stopwatch->start(self::$defaultName);
+        $stopwatch->start($this->getName());
         $io = new SymfonyStyle($input, $output);
         $io->title(Version::NAME . ': ' . $this->getDescription());
 
@@ -98,7 +100,7 @@ class BuildCommand extends Command
         }
 
         // Finish up
-        $event = $stopwatch->stop(self::$defaultName);
+        $event = $stopwatch->stop($this->getName());
         $io->newLine();
         $io->text(sprintf('Execution time: %01.2f secs', $event->getDuration() / 1000));
         $io->text(sprintf('Memory usage: %01.2f MB', $event->getMemory()  / 1024 / 1024));
@@ -125,5 +127,4 @@ class BuildCommand extends Command
     {
         return strpos($this->actions, 'z') !== false;
     }
-
 }

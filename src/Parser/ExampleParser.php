@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Studio24\DesignSystem\Parser;
@@ -113,7 +114,6 @@ class ExampleParser extends ParserAbstract
             if ($this->output->isVerbose()) {
                 $this->output->text('* ' . $destination);
             }
-
         } catch (FilesystemException | UnableToWriteFile $exception) {
             throw new ExampleTagException(sprintf('Cannot save example template to %s (%s). Error with tag %s in doc file %s', $filename, $exception->getMessage(), $this->currentHtmlMatch, $this->currentFile));
         }
@@ -126,5 +126,4 @@ class ExampleParser extends ParserAbstract
         ];
         return $this->twig->render('@DesignSystem/partials/_example.html.twig', $data);
     }
-
 }

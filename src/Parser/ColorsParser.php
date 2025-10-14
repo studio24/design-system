@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Studio24\DesignSystem\Parser;
@@ -105,5 +106,4 @@ class ColorsParser extends ParserAbstract
             throw new ColorsTagException(sprintf('Color data array invalid, key %s is not an array. Error with tag %s in doc file %', $key, $this->currentHtmlMatch, $this->currentFile));
         }
     }
-
 }

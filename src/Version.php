@@ -27,5 +27,4 @@ final class Version
         }
         return null;
     }
-
 }

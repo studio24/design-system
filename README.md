@@ -15,7 +15,7 @@ Key features:
 
 ## Requirements
 
-* PHP 7.4+
+* PHP 8.2+
 * [Composer](https://getcomposer.org/)
 
 ## Installation

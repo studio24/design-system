@@ -48,7 +48,7 @@ class Config
      * @throws PathDoesNotExistException
      * @throws \League\Flysystem\FilesystemException
      */
-    public function __construct(string $rootPath, string $configPath = null)
+    public function __construct(string $rootPath, ?string $configPath = null)
     {
         $this->setRootPath($rootPath);
         $adapter = new LocalFilesystemAdapter($rootPath);
@@ -65,7 +65,7 @@ class Config
      * @param ?string $currentUrl
      * @return array
      */
-    public function getNavigation(string $currentUrl = null): array
+    public function getNavigation(?string $currentUrl = null): array
     {
         $navigation = [];
         foreach ($this->get('navigation') as $label => $url) {
@@ -130,7 +130,7 @@ class Config
         }
 
         // Require config file, which must contain a $config array
-        require $configPath;
+        require $this->getFullPath($configPath);
         if (!isset($config) || !is_array($config)) {
             throw new ConfigException(sprintf('Config file %s must contain the $config variable and it must be an array', $configPath));
         }
@@ -263,5 +263,4 @@ class Config
         }
         return $title;
     }
-
 }

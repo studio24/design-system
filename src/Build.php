@@ -1,9 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Studio24\DesignSystem;
 
-use Alchemy\Zippy\Zippy;
 use League\Flysystem\FileAttributes;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemException;
@@ -20,6 +20,9 @@ use Studio24\DesignSystem\Parser\Markdown;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Twig\Loader\FilesystemLoader;
 use Twig\Environment;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use ZipArchive;
 
 class Build
 {
@@ -43,7 +46,8 @@ class Build
         $this->output = $output;
 
         // Set default file permissions
-        $visibility = PortableVisibilityConverter::fromArray([
+        $visibility = PortableVisibilityConverter::fromArray(
+            [
             'file' => [
                 'public' => 0644,
                 'private' => 0600,
@@ -52,8 +56,9 @@ class Build
                 'public' => 0755,
                 'private' => 0700,
             ],
-        ],
-        Visibility::PUBLIC);
+            ],
+            Visibility::PUBLIC
+        );
         $adapter = new LocalFilesystemAdapter($config->getRootPath(), $visibility);
         $this->filesystem = new Filesystem($adapter);
         $this->markdown = new Markdown();
@@ -110,7 +115,6 @@ class Build
         try {
             $this->filesystem->deleteDirectory($destination);
             $this->filesystem->createDirectory($destination);
-
         } catch (FilesystemException | UnableToDeleteDirectory $exception) {
             throw new BuildException(sprintf('Cannot clean destination folder, error: %s', $exception->getMessage()));
         }
@@ -130,13 +134,13 @@ class Build
         }
 
         // Change dir, then run command
-        $command = sprintf('cd %s && %s',$this->config->getRootPath(), $command);
+        $command = sprintf('cd %s && %s', $this->config->getRootPath(), $command);
         $output = '';
 
         if ($passthru) {
-            passthru($command,$status);
+            passthru($command, $status);
         } else {
-            exec($command,$output,$status);
+            exec($command, $output, $status);
         }
 
         if ($status !== 0) {
@@ -245,7 +249,7 @@ class Build
 
         // Sort layouts in each sub-directory
         foreach ($pages as $subDirectory => $children) {
-            uasort($pages[$subDirectory], function($a, $b) {
+            uasort($pages[$subDirectory], function ($a, $b) {
                 // Stick index layouts to top
                 if ($a['filename'] === 'index') {
                     return -1;
@@ -383,7 +387,7 @@ class Build
     /**
      * Create ZIP file of website assets for developer use
      *
-     * @see https://github.com/alchemy-fr/Zippy
+     * @see https://www.php.net/manual/en/class.ziparchive.php
      */
     public function buildZipFile()
     {
@@ -391,11 +395,9 @@ class Build
             $this->output->text('Skipping, no ZIP folder defined in config');
             return false;
         }
-
-        // Path to folder to add to ZIP archive (relative to project root)
         $zipFolder = $this->config->get('zip_folder');
         if (empty($zipFolder)) {
-            $this->output->text('Skipping, no ZIP folder defined in config');
+            $this->output->text('Skipping, no source folder to creat a ZIP defined in config');
             return false;
         }
         $source = $this->config->getFullPath($zipFolder);
@@ -413,21 +415,29 @@ class Build
         }
         $destination = $this->config->getFullPath($this->config->buildPath(Config::ASSETS_PATH, $zipName)) . '.zip';
 
-        try {
-            $zippy = Zippy::load();
-            $archive = $zippy->create($destination, [
-                $zipName => $source
-            ], true);
-
-            if ($this->output->isVerbose()) {
-                $this->output->text('* ' . $destination);
-            }
-
-            return true;
-
-        } catch (\Alchemy\Zippy\Exception\ExceptionInterface $exception) {
-            throw new BuildException(sprintf('Cannot build ZIP archive for folder %s, destination %s, error: %s', $zipFolder, $destination, $exception->getMessage()));
+        // Setup ZIP archive
+        $zip = new ZipArchive();
+        if ($zip->open($destination, ZipArchive::CREATE) !== true) {
+            throw new BuildException(sprintf('Cannot create ZIP archive at %s', $destination));
         }
-    }
 
+        // ZIP folders
+        $info = pathinfo($source);
+        $zipFolderRegex = '/^' . preg_quote($info["dirname"] . '/' . $info["basename"], '/') . '/';
+
+        // Add all files in source folder to ZIP
+        $flags = \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::CURRENT_AS_SELF;
+        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source, $flags));
+        /** @var RecursiveDirectoryIterator $file */
+        foreach ($files as $file) {
+            $filepath = $file->getPathname();
+            $zipPath = preg_replace($zipFolderRegex, '', $filepath);
+            $zip->addFile($filepath, $zipPath);
+        }
+
+        if (!$zip->close()) {
+            throw new BuildException(sprintf('Cannot save ZIP archive at %s', $destination));
+        }
+        return true;
+    }
 }

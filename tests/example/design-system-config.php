@@ -6,6 +6,7 @@
  * Overrides default config settings
  * @see Studio24\DesignSystem\Config::$config
  */
+
 $config = [
     'site_title'  => 'Studio 24 Design System',
     'navigation'        => [
@@ -14,6 +15,5 @@ $config = [
         'Guidelines' => '/guidelines/',
         'Templates' => '/templates/',
     ],
-    'zip_folder' => 'apollo/assets'
+    'zip_folder' => '_dist/assets/design-system'
 ];
-

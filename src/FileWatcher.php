@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Studio24\DesignSystem;
@@ -78,5 +79,4 @@ class FileWatcher
 
         return false;
     }
-
 }
